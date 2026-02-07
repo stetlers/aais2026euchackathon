@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAULT-TEC ID CARD - AAIS 2026 EUC Hackathon</title>
+    <meta property="og:title" content="Vault-Tec ID Card - AAIS 2026 EUC Hackathon">
+    <meta property="og:description" content="Official Vault Dweller identification for the AAIS 2026 EUC Hackathon">
+    <meta property="og:type" content="website">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: 'VT323', monospace;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('pre-war-new-vegas-is-absolutely-stunning-i-am-in-sheer-awe-v0-gqg29pm5z0kf1.jpg.webp') center center;
+            background-size: cover;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.9) 100%);
+            z-index: -1;
+        }
+
+        .page-title {
+            color: #33ff33;
+            font-size: 28px;
+            text-shadow: 0 0 10px #33ff33;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* The ID Card */
+        .id-card {
+            width: 500px;
+            max-width: 95vw;
+            background: linear-gradient(135deg, #1a1a0a 0%, #2a2815 50%, #1a1a0a 100%);
+            border: 4px solid #aa8800;
+            border-radius: 15px;
+            padding: 0;
+            position: relative;
+            box-shadow: 
+                0 0 30px rgba(170, 136, 0, 0.3),
+                0 0 60px rgba(0,0,0,0.8),
+                inset 0 0 50px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Header stripe */
+        .card-header {
+            background: linear-gradient(90deg, #aa8800 0%, #ddaa00 50%, #aa8800 100%);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #886600;
+        }
+
+        .vault-tec-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #001a00;
+            text-shadow: 1px 1px 0 #ffcc66;
+            letter-spacing: 2px;
+        }
+
+        .card-type {
+            font-size: 16px;
+            color: #001a00;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Card body */
+        .card-body {
+            padding: 20px;
+            color: #ddcc88;
+        }
+
+        .vault-number {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .vault-number-label {
+            font-size: 14px;
+            color: #aa9966;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .vault-number-value {
+            font-size: 48px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00, 0 0 20px #aa8800;
+            letter-spacing: 5px;
+        }
+
+        .team-name {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #665500;
+            border-radius: 5px;
+        }
+
+        .team-name-label {
+            font-size: 12px;
+            color: #aa9966;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .team-name-value {
+            font-size: 32px;
+            color: #ffdd44;
+            text-shadow: 0 0 5px #ffcc00;
+            word-wrap: break-word;
+        }
+
+        .assignment-section {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-left: 3px solid #aa8800;
+        }
+
+        .section-label {
+            font-size: 12px;
+            color: #aa9966;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .section-value {
+            font-size: 18px;
+            color: #ddcc88;
+        }
+
+        .section-value.highlight {
+            color: #ffcc66;
+        }
+
+        .members-section {
+            margin-top: 15px;
+        }
+
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .member-item {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .member-name {
+            color: #ddcc88;
+        }
+
+        .member-role {
+            color: #aa9966;
+            font-size: 12px;
+        }
+
+        /* Card footer */
+        .card-footer {
+            background: linear-gradient(90deg, #332200 0%, #443311 50%, #332200 100%);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid #554422;
+            font-size: 12px;
+            color: #aa9966;
+        }
+
+        .classification {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .event-name {
+            text-align: right;
+        }
+
+        /* Corner decorations */
+        .id-card::before {
+            content: '☢';
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            font-size: 40px;
+            color: rgba(170, 136, 0, 0.15);
+        }
+
+        /* Actions */
+        .actions {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: rgba(0,255,0,0.2);
+            color: #ccffcc;
+        }
+
+        .btn-amber {
+            border-color: #ffcc66;
+            color: #ffcc66;
+        }
+
+        .btn-amber:hover {
+            background: rgba(255,200,0,0.2);
+            color: #ffeeaa;
+        }
+
+        /* Loading state */
+        .loading {
+            color: #66aa66;
+            font-size: 24px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        /* Error state */
+        .error {
+            color: #ff6666;
+            font-size: 20px;
+            text-align: center;
+            padding: 40px;
+            background: rgba(50,0,0,0.5);
+            border: 2px solid #aa4444;
+            border-radius: 10px;
+        }
+
+        /* Copy notification */
+        .copy-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #33ff33;
+            color: #001200;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 18px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .copy-notification.visible {
+            display: block;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        /* Back link */
+        .back-link {
+            margin-top: 20px;
+            color: #66aa66;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .back-link:hover {
+            color: #aaffaa;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-15deg);
+            font-size: 60px;
+            color: rgba(170, 136, 0, 0.08);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-title">☢ VAULT-TEC PERSONNEL IDENTIFICATION ☢</div>
+
+    <div id="loading" class="loading">ACCESSING VAULT-TEC DATABASE...</div>
+    
+    <div id="error" class="error" style="display: none;">
+        TERMINAL ERROR: VAULT DWELLER NOT FOUND<br><br>
+        <a href="terminal.html" class="btn">← RETURN TO TERMINAL</a>
+    </div>
+
+    <div id="card-container" style="display: none;">
+        <div class="id-card" id="id-card">
+            <div class="card-header">
+                <div class="vault-tec-logo">VAULT-TEC</div>
+                <div class="card-type">Personnel ID</div>
+            </div>
+            
+            <div class="card-body">
+                <div class="vault-number">
+                    <div class="vault-number-label">Vault Dweller #</div>
+                    <div class="vault-number-value" id="vault-number">---</div>
+                </div>
+
+                <div class="team-name">
+                    <div class="team-name-label">Registered Name</div>
+                    <div class="team-name-value" id="team-name">Loading...</div>
+                </div>
+
+                <div class="assignment-section">
+                    <div class="section-label">Assigned Project</div>
+                    <div class="section-value highlight" id="use-case-name">Not Assigned</div>
+                </div>
+
+                <div class="assignment-section">
+                    <div class="section-label">Project Classification</div>
+                    <div class="section-value" id="use-case-archetype">---</div>
+                </div>
+
+                <div class="members-section">
+                    <div class="section-label">Registered Personnel</div>
+                    <div class="members-grid" id="members-list">
+                        <div class="member-item">
+                            <div class="member-name">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="watermark">VAULT-TEC APPROVED</div>
+            </div>
+
+            <div class="card-footer">
+                <div class="classification">CLASSIFICATION: TEAM EYES ONLY</div>
+                <div class="event-name">AAIS 2026 EUC HACKATHON</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-amber" onclick="copyLink()">📋 COPY LINK</button>
+            <a href="terminal.html" class="btn">← BACK TO TERMINAL</a>
+        </div>
+    </div>
+
+    <div class="copy-notification" id="copy-notification">✓ LINK COPIED TO CLIPBOARD</div>
+
+    <script>
+        const API_URL = 'https://fc4xp2lydj.execute-api.us-east-1.amazonaws.com/prod';
+
+        // Get team ID from URL parameter
+        function getTeamIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('team');
+        }
+
+        // Generate a vault number from team ID (deterministic hash)
+        function generateVaultNumber(teamId) {
+            let hash = 0;
+            for (let i = 0; i < teamId.length; i++) {
+                const char = teamId.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            // Convert to positive 4-digit number
+            const num = Math.abs(hash % 9000) + 1000;
+            return num.toString();
+        }
+
+        // Load use cases to get names
+        async function loadUseCases() {
+            try {
+                const res = await fetch(`${API_URL}/use-cases`);
+                if (!res.ok) return {};
+                const data = await res.json();
+                const useCases = {};
+                data.use_cases.forEach((uc, idx) => {
+                    useCases[idx + 1] = {
+                        name: uc.name,
+                        archetype: uc.archetype
+                    };
+                });
+                return useCases;
+            } catch (err) {
+                console.error('Error loading use cases:', err);
+                return {};
+            }
+        }
+
+        // Main load function
+        async function loadCard() {
+            const teamId = getTeamIdFromUrl();
+            
+            if (!teamId) {
+                // No team specified, check if logged in
+                const storedTeamId = localStorage.getItem('teamId');
+                if (storedTeamId) {
+                    window.location.href = `vault-id-card.html?team=${storedTeamId}`;
+                    return;
+                }
+                showError();
+                return;
+            }
+
+            try {
+                // Load use cases first
+                const useCases = await loadUseCases();
+
+                // Fetch team data (this endpoint is public for panelists, so we'll try with token if available)
+                const token = localStorage.getItem('token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                
+                // Try to get team data - for public access we need a public endpoint
+                // Since /teams/{id} requires panelist auth, we'll check if user is the team owner
+                let teamData = null;
+                
+                if (token && localStorage.getItem('teamId') === teamId) {
+                    // User is viewing their own card
+                    const res = await fetch(`${API_URL}/team/me`, { headers });
+                    if (res.ok) {
+                        teamData = await res.json();
+                    }
+                }
+
+                if (!teamData) {
+                    // Try panelist endpoint (if user is a panelist)
+                    const res = await fetch(`${API_URL}/teams/${teamId}`, { headers });
+                    if (res.ok) {
+                        teamData = await res.json();
+                    }
+                }
+
+                if (!teamData) {
+                    showError();
+                    return;
+                }
+
+                // Populate card
+                document.getElementById('vault-number').textContent = generateVaultNumber(teamId);
+                document.getElementById('team-name').textContent = teamData.team_name || teamId;
+                
+                // Use case info
+                if (teamData.use_case && useCases[teamData.use_case]) {
+                    document.getElementById('use-case-name').textContent = useCases[teamData.use_case].name;
+                    document.getElementById('use-case-archetype').textContent = useCases[teamData.use_case].archetype;
+                } else if (teamData.use_case_name) {
+                    document.getElementById('use-case-name').textContent = teamData.use_case_name;
+                    document.getElementById('use-case-archetype').textContent = 'Classified';
+                } else {
+                    document.getElementById('use-case-name').textContent = 'Assignment Pending';
+                    document.getElementById('use-case-archetype').textContent = '---';
+                }
+
+                // Members
+                const membersContainer = document.getElementById('members-list');
+                const members = teamData.members || [];
+                
+                if (members.length > 0) {
+                    membersContainer.innerHTML = members.map(m => `
+                        <div class="member-item">
+                            <div class="member-name">${m.name || 'Anonymous'}</div>
+                            ${m.role ? `<div class="member-role">${m.role}</div>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    membersContainer.innerHTML = `
+                        <div class="member-item">
+                            <div class="member-name">No personnel registered</div>
+                        </div>
+                    `;
+                }
+
+                // Show card
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('card-container').style.display = 'block';
+
+            } catch (err) {
+                console.error('Error loading team:', err);
+                showError();
+            }
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function copyLink() {
+            const teamId = getTeamIdFromUrl() || localStorage.getItem('teamId');
+            const url = `${window.location.origin}/vault-id-card.html?team=${teamId}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                const notification = document.getElementById('copy-notification');
+                notification.classList.add('visible');
+                setTimeout(() => {
+                    notification.classList.remove('visible');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                prompt('Copy this link:', url);
+            });
+        }
+
+        // Load on page ready
+        window.onload = loadCard;
+    </script>
+</body>
+</html>

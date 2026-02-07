@@ -275,6 +275,7 @@
                     <!-- Quick Links -->
                     <div class="quick-links">
                         <span class="clickable-link" onclick="showJudgingCriteriaPopup()">📋 View Judging Criteria</span>
+                        <span class="clickable-link" onclick="viewVaultIdCard()">🪪 View Vault ID Card</span>
                     </div>
 
                     <!-- Use Case Selection -->
@@ -588,6 +589,11 @@
         function logout() {
             localStorage.clear();
             window.location.href = 'login.html';
+        }
+
+        function viewVaultIdCard() {
+            const teamId = localStorage.getItem('teamId');
+            window.open(`vault-id-card.html?team=${teamId}`, '_blank');
         }
 
         // Popup functions
