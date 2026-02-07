@@ -134,6 +134,11 @@ def lambda_handler(event, context):
         if path == '/judging-criteria' and http_method == 'GET':
             return get_judging_criteria()
         
+        # Public team card route (no auth required, limited data for sharing)
+        if path.startswith('/team-card/') and http_method == 'GET':
+            team_id = path.split('/')[-1]
+            return get_public_team_card(team_id)
+        
         # Protected routes - require auth
         auth = get_auth_context(event)
         if not auth:
@@ -347,6 +352,32 @@ def panelist_login(body):
             'name': panelist.get('name', panelist_id),
             'is_admin': is_admin
         })
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+# Public team card handler (no auth required)
+def get_public_team_card(team_id):
+    """Get limited team info for public sharing (no auth required)"""
+    try:
+        result = teams_table.get_item(Key={'team_id': team_id})
+        team = result.get('Item')
+        
+        if not team:
+            return response(404, {'error': 'Team not found'})
+        
+        # Return only public-safe fields for sharing
+        public_data = {
+            'team_id': team.get('team_id'),
+            'team_name': team.get('team_name'),
+            'use_case': team.get('use_case'),
+            'use_case_name': team.get('use_case_name'),
+            'members': [
+                {'name': m.get('name'), 'role': m.get('role')}
+                for m in (team.get('members') or [])
+            ]  # Exclude email for privacy
+        }
+        
+        return response(200, public_data)
     except Exception as e:
         return response(500, {'error': str(e)})
 

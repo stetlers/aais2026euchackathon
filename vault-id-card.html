@@ -343,12 +343,12 @@
         <div class="id-card" id="id-card">
             <div class="card-header">
                 <div class="vault-tec-logo">VAULT-TEC</div>
-                <div class="card-type">Personnel ID</div>
+                <div class="card-type">Team ID</div>
             </div>
             
             <div class="card-body">
                 <div class="vault-number">
-                    <div class="vault-number-label">Vault Dweller #</div>
+                    <div class="vault-number-label">Security ID #</div>
                     <div class="vault-number-value" id="vault-number">---</div>
                 </div>
 
@@ -454,27 +454,31 @@
                 // Load use cases first
                 const useCases = await loadUseCases();
 
-                // Fetch team data (this endpoint is public for panelists, so we'll try with token if available)
-                const token = localStorage.getItem('token');
-                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-                
-                // Try to get team data - for public access we need a public endpoint
-                // Since /teams/{id} requires panelist auth, we'll check if user is the team owner
+                // Try public team card endpoint first (no auth required)
                 let teamData = null;
                 
-                if (token && localStorage.getItem('teamId') === teamId) {
-                    // User is viewing their own card
-                    const res = await fetch(`${API_URL}/team/me`, { headers });
-                    if (res.ok) {
-                        teamData = await res.json();
-                    }
+                const publicRes = await fetch(`${API_URL}/team-card/${teamId}`);
+                if (publicRes.ok) {
+                    teamData = await publicRes.json();
                 }
 
+                // Fallback: try authenticated endpoints if public fails
                 if (!teamData) {
-                    // Try panelist endpoint (if user is a panelist)
-                    const res = await fetch(`${API_URL}/teams/${teamId}`, { headers });
-                    if (res.ok) {
-                        teamData = await res.json();
+                    const token = localStorage.getItem('token');
+                    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                    
+                    if (token && localStorage.getItem('teamId') === teamId) {
+                        const res = await fetch(`${API_URL}/team/me`, { headers });
+                        if (res.ok) {
+                            teamData = await res.json();
+                        }
+                    }
+                    
+                    if (!teamData) {
+                        const res = await fetch(`${API_URL}/teams/${teamId}`, { headers });
+                        if (res.ok) {
+                            teamData = await res.json();
+                        }
                     }
                 }
 
