@@ -386,6 +386,7 @@
         </div>
 
         <div class="actions">
+            <button class="btn btn-amber" onclick="downloadCard()">⬇ DOWNLOAD IMAGE</button>
             <button class="btn btn-amber" onclick="copyLink()">📋 COPY LINK</button>
             <a href="terminal.html" class="btn">← BACK TO TERMINAL</a>
         </div>
@@ -393,6 +394,9 @@
 
     <div class="copy-notification" id="copy-notification">✓ LINK COPIED TO CLIPBOARD</div>
 
+    <!-- html2canvas for image download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <script>
         const API_URL = 'https://fc4xp2lydj.execute-api.us-east-1.amazonaws.com/prod';
 
@@ -551,6 +555,37 @@
                 console.error('Failed to copy:', err);
                 prompt('Copy this link:', url);
             });
+        }
+
+        async function downloadCard() {
+            const card = document.getElementById('id-card');
+            const teamName = document.getElementById('team-name').textContent;
+            
+            try {
+                const canvas = await html2canvas(card, {
+                    backgroundColor: '#1a1a0a',
+                    scale: 2, // Higher resolution
+                    useCORS: true,
+                    logging: false
+                });
+                
+                const link = document.createElement('a');
+                link.download = `vault-id-card-${teamName.toLowerCase().replace(/\s+/g, '-')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                // Show notification
+                const notification = document.getElementById('copy-notification');
+                notification.textContent = '✓ IMAGE DOWNLOADED';
+                notification.classList.add('visible');
+                setTimeout(() => {
+                    notification.classList.remove('visible');
+                    notification.textContent = '✓ LINK COPIED TO CLIPBOARD';
+                }, 2000);
+            } catch (err) {
+                console.error('Download failed:', err);
+                alert('Failed to download image. Please try taking a screenshot instead.');
+            }
         }
 
         // Load on page ready
