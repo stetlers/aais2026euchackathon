@@ -74,6 +74,9 @@ aws dynamodb scan --table-name aais-hackathon-use-cases --region us-east-1 > bac
 | POST/GET | `/scores` | Panelist | Submit/get scores |
 | POST/PUT/DELETE | `/use-cases/*` | Admin | Manage use cases |
 | PUT | `/judging-criteria` | Admin | Update criteria |
+| PUT | `/teams/{id}/reset-password` | Admin | Reset team password |
+| DELETE | `/teams/{id}` | Admin | Delete team (and scores) |
+| PUT | `/panelists/{id}/reset-password` | Admin | Reset panelist password |
 
 ## Key Implementation Details
 

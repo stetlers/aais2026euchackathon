@@ -286,6 +286,25 @@ aws apigateway create-rest-api \
 
 **API Endpoint Format:** `https://{api-id}.execute-api.us-east-1.amazonaws.com/prod`
 
+### Admin Management Routes
+
+The API includes admin-only routes for managing teams and panelists:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| PUT | `/teams/{team_id}/reset-password` | Reset a team's password |
+| DELETE | `/teams/{team_id}` | Delete team and all associated scores |
+| PUT | `/panelists/{panelist_id}/reset-password` | Reset a panelist's password |
+
+**Reset Password Request Body:**
+```json
+{
+  "new_password": "minimum-6-characters"
+}
+```
+
+**Note:** These routes require admin authentication (panelist with `is_admin=true`).
+
 ---
 
 ## 🪣 S3 + CloudFront (Static Hosting)
