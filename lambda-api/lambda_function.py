@@ -198,6 +198,26 @@ def lambda_handler(event, context):
                 return response(403, {'error': 'Forbidden - Admin access only'})
             return update_judging_criteria(body)
         
+        # Admin-only team management
+        if path.startswith('/teams/') and path.endswith('/reset-password') and http_method == 'PUT':
+            if auth.get('type') != 'panelist' or not auth.get('is_admin'):
+                return response(403, {'error': 'Forbidden - Admin access only'})
+            team_id = path.split('/')[2]
+            return admin_reset_team_password(team_id, body)
+        
+        if path.startswith('/teams/') and http_method == 'DELETE':
+            if auth.get('type') != 'panelist' or not auth.get('is_admin'):
+                return response(403, {'error': 'Forbidden - Admin access only'})
+            team_id = path.split('/')[-1]
+            return admin_delete_team(team_id)
+        
+        # Admin-only panelist password reset
+        if path.startswith('/panelists/') and path.endswith('/reset-password') and http_method == 'PUT':
+            if auth.get('type') != 'panelist' or not auth.get('is_admin'):
+                return response(403, {'error': 'Forbidden - Admin access only'})
+            panelist_id = path.split('/')[2]
+            return admin_reset_panelist_password(panelist_id, body)
+        
         return response(404, {'error': 'Not found'})
         
     except Exception as e:
@@ -707,5 +727,93 @@ def update_judging_criteria(body):
         )
         
         return response(200, result.get('Attributes', {}))
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+# Admin team management handlers
+def admin_reset_team_password(team_id, body):
+    """Reset a team's password (admin only)"""
+    new_password = body.get('new_password', '')
+    
+    if not new_password or len(new_password) < 6:
+        return response(400, {'error': 'new_password required (minimum 6 characters)'})
+    
+    try:
+        # Check if team exists
+        result = teams_table.get_item(Key={'team_id': team_id})
+        if not result.get('Item'):
+            return response(404, {'error': 'Team not found'})
+        
+        # Update password
+        teams_table.update_item(
+            Key={'team_id': team_id},
+            UpdateExpression='SET password = :pw, updated_at = :ua',
+            ExpressionAttributeValues={
+                ':pw': new_password,
+                ':ua': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            }
+        )
+        
+        return response(200, {'message': f'Password reset successfully for team {team_id}'})
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+def admin_delete_team(team_id):
+    """Delete a team and their scores (admin only)"""
+    try:
+        # Check if team exists
+        result = teams_table.get_item(Key={'team_id': team_id})
+        if not result.get('Item'):
+            return response(404, {'error': 'Team not found'})
+        
+        team_name = result['Item'].get('team_name', team_id)
+        
+        # Delete all scores for this team
+        scores_result = scores_table.query(
+            KeyConditionExpression='team_id = :tid',
+            ExpressionAttributeValues={':tid': team_id}
+        )
+        
+        for score in scores_result.get('Items', []):
+            scores_table.delete_item(
+                Key={
+                    'team_id': team_id,
+                    'panelist_id': score['panelist_id']
+                }
+            )
+        
+        # Delete the team
+        teams_table.delete_item(Key={'team_id': team_id})
+        
+        return response(200, {
+            'message': f'Team "{team_name}" and all associated scores deleted successfully'
+        })
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+def admin_reset_panelist_password(panelist_id, body):
+    """Reset a panelist's password (admin only)"""
+    new_password = body.get('new_password', '')
+    
+    if not new_password or len(new_password) < 6:
+        return response(400, {'error': 'new_password required (minimum 6 characters)'})
+    
+    try:
+        # Check if panelist exists
+        result = panelists_table.get_item(Key={'panelist_id': panelist_id})
+        if not result.get('Item'):
+            return response(404, {'error': 'Panelist not found'})
+        
+        # Update password
+        panelists_table.update_item(
+            Key={'panelist_id': panelist_id},
+            UpdateExpression='SET password = :pw, updated_at = :ua',
+            ExpressionAttributeValues={
+                ':pw': new_password,
+                ':ua': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            }
+        )
+        
+        return response(200, {'message': f'Password reset successfully for panelist {panelist_id}'})
     except Exception as e:
         return response(500, {'error': str(e)})

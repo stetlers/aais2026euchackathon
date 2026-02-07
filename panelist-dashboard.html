@@ -502,6 +502,14 @@
                         <div id="admin-use-cases-list"></div>
                         
                         <button class="btn btn-admin" onclick="showAddUseCaseForm()">+ ADD NEW USE CASE</button>
+
+                        <h2 style="margin-top: 25px;">TEAM MANAGEMENT <span class="admin-badge">ADMIN</span></h2>
+                        <p style="color: #aa8800; margin-bottom: 15px;">Reset team passwords or delete teams from the system.</p>
+                        <div id="admin-teams-list"></div>
+
+                        <h2 style="margin-top: 25px;">PANELIST MANAGEMENT <span class="admin-badge">ADMIN</span></h2>
+                        <p style="color: #aa8800; margin-bottom: 15px;">Reset panelist passwords.</p>
+                        <div id="admin-panelists-list"></div>
                         
                         <div id="add-use-case-form" class="hidden" style="margin-top: 15px; padding: 15px; border: 1px solid #aa8800;">
                             <h3 style="color: #ffcc66; margin-bottom: 15px;">NEW USE CASE</h3>
@@ -797,6 +805,8 @@
             if (isAdmin) {
                 document.getElementById('admin-section').classList.remove('hidden');
                 await renderAdminUseCases();
+                await renderAdminTeams();
+                await renderAdminPanelists();
             }
         };
 
@@ -1415,6 +1425,197 @@
         function hideEditJudgingCriteriaForm() {
             document.getElementById('edit-judging-form').classList.add('hidden');
             document.getElementById('edit-judging-form').innerHTML = '';
+        }
+
+        // ========== ADMIN TEAM MANAGEMENT FUNCTIONS ==========
+
+        async function renderAdminTeams() {
+            const container = document.getElementById('admin-teams-list');
+            
+            if (teams.length === 0) {
+                container.innerHTML = '<p style="color: #66aa66;">No teams registered yet.</p>';
+                return;
+            }
+
+            container.innerHTML = teams.map(team => `
+                <div class="use-case-admin-card" id="admin-team-${team.team_id}">
+                    <div class="use-case-admin-header">
+                        <div class="use-case-admin-title">
+                            ${team.team_name || team.team_id}
+                            <span style="color: #66aa66; font-size: 14px;"> (${team.team_id})</span>
+                        </div>
+                        <div class="use-case-admin-actions">
+                            <button class="btn btn-small btn-admin" onclick="showResetTeamPasswordForm('${team.team_id}', '${(team.team_name || team.team_id).replace(/'/g, "\\'")}')">🔑 RESET PASSWORD</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteTeam('${team.team_id}', '${(team.team_name || team.team_id).replace(/'/g, "\\'")}')" style="border-color: #ff6666; color: #ff6666;">✕ DELETE</button>
+                        </div>
+                    </div>
+                    <div id="reset-pw-form-${team.team_id}" class="hidden" style="margin-top: 10px; padding: 10px; border: 1px solid #aa8800;"></div>
+                </div>
+            `).join('');
+        }
+
+        function showResetTeamPasswordForm(teamId, teamName) {
+            const formContainer = document.getElementById(`reset-pw-form-${teamId}`);
+            
+            formContainer.innerHTML = `
+                <h4 style="color: #ffcc66; margin-bottom: 10px;">Reset Password for ${teamName}</h4>
+                <div class="admin-form-group">
+                    <label>New Password (min 6 characters):</label>
+                    <input type="password" id="new-pw-${teamId}" placeholder="Enter new password">
+                </div>
+                <button class="btn btn-admin btn-small" onclick="resetTeamPassword('${teamId}')">CONFIRM RESET</button>
+                <button class="btn btn-small" onclick="hideResetTeamPasswordForm('${teamId}')">CANCEL</button>
+                <div id="reset-pw-status-${teamId}" class="admin-status hidden"></div>
+            `;
+            formContainer.classList.remove('hidden');
+        }
+
+        function hideResetTeamPasswordForm(teamId) {
+            const formContainer = document.getElementById(`reset-pw-form-${teamId}`);
+            formContainer.classList.add('hidden');
+            formContainer.innerHTML = '';
+        }
+
+        async function resetTeamPassword(teamId) {
+            const newPassword = document.getElementById(`new-pw-${teamId}`).value;
+            const statusEl = document.getElementById(`reset-pw-status-${teamId}`);
+
+            if (!newPassword || newPassword.length < 6) {
+                showAdminStatus(statusEl, 'ERROR: Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/teams/${teamId}/reset-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ new_password: newPassword })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showAdminStatus(statusEl, 'ERROR: ' + (data.error || 'Reset failed'), 'error');
+                    return;
+                }
+
+                showAdminStatus(statusEl, 'PASSWORD RESET SUCCESSFULLY', 'success');
+                setTimeout(() => hideResetTeamPasswordForm(teamId), 1500);
+            } catch (err) {
+                showAdminStatus(statusEl, 'ERROR: Connection failed', 'error');
+            }
+        }
+
+        async function deleteTeam(teamId, teamName) {
+            if (!confirm(`⚠️ WARNING: Are you sure you want to delete team "${teamName}"?\n\nThis will permanently delete:\n• The team registration\n• All scores for this team\n\nThis action CANNOT be undone!`)) {
+                return;
+            }
+
+            // Second confirmation
+            if (!confirm(`FINAL CONFIRMATION\n\nType team ID to confirm: ${teamId}\n\nClick OK to proceed with deletion.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/teams/${teamId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert('ERROR: ' + (data.error || 'Delete failed'));
+                    return;
+                }
+
+                alert(`Team "${teamName}" deleted successfully.`);
+                
+                // Refresh data
+                await loadData();
+                await renderAdminTeams();
+            } catch (err) {
+                alert('ERROR: Connection failed');
+            }
+        }
+
+        // ========== ADMIN PANELIST MANAGEMENT FUNCTIONS ==========
+
+        async function loadPanelists() {
+            // Note: We don't have a /panelists endpoint, so we'll use a simple approach
+            // For now, show current panelist only - in a full implementation you'd add a GET /panelists admin route
+            return [{ panelist_id: panelistId, name: localStorage.getItem('panelistName') }];
+        }
+
+        async function renderAdminPanelists() {
+            const container = document.getElementById('admin-panelists-list');
+            
+            container.innerHTML = `
+                <div class="use-case-admin-card">
+                    <div class="use-case-admin-header">
+                        <div class="use-case-admin-title">
+                            Reset Any Panelist Password
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; padding: 10px; border: 1px solid #336633;">
+                        <div class="admin-form-group">
+                            <label>Panelist ID:</label>
+                            <input type="text" id="reset-panelist-id" placeholder="Enter panelist ID">
+                        </div>
+                        <div class="admin-form-group">
+                            <label>New Password (min 6 characters):</label>
+                            <input type="password" id="reset-panelist-pw" placeholder="Enter new password">
+                        </div>
+                        <button class="btn btn-admin" onclick="resetPanelistPassword()">🔑 RESET PANELIST PASSWORD</button>
+                        <div id="reset-panelist-status" class="admin-status hidden"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function resetPanelistPassword() {
+            const panelistIdToReset = document.getElementById('reset-panelist-id').value.trim().toLowerCase().replace(' ', '-');
+            const newPassword = document.getElementById('reset-panelist-pw').value;
+            const statusEl = document.getElementById('reset-panelist-status');
+
+            if (!panelistIdToReset) {
+                showAdminStatus(statusEl, 'ERROR: Panelist ID required', 'error');
+                return;
+            }
+
+            if (!newPassword || newPassword.length < 6) {
+                showAdminStatus(statusEl, 'ERROR: Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/panelists/${panelistIdToReset}/reset-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ new_password: newPassword })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showAdminStatus(statusEl, 'ERROR: ' + (data.error || 'Reset failed'), 'error');
+                    return;
+                }
+
+                showAdminStatus(statusEl, `PASSWORD RESET SUCCESSFULLY FOR ${panelistIdToReset}`, 'success');
+                document.getElementById('reset-panelist-id').value = '';
+                document.getElementById('reset-panelist-pw').value = '';
+            } catch (err) {
+                showAdminStatus(statusEl, 'ERROR: Connection failed', 'error');
+            }
         }
 
         async function saveJudgingCriteria() {
