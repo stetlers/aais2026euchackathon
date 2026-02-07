@@ -81,6 +81,23 @@ aws s3 cp terminal.html s3://aais2026euchackathon.com/index.html --content-type 
 aws cloudfront create-invalidation --distribution-id E2K0ALSZE884A6 --paths "/*"
 ```
 
+## 🗄️ Infrastructure Setup
+
+*"Building for the future, even if that future is a wasteland."*
+
+Setting up a new environment? See **[INFRASTRUCTURE.md](INFRASTRUCTURE.md)** for complete deployment instructions including:
+
+- **DynamoDB Tables** — 5 tables with full schemas and creation commands
+  - `aais-hackathon-teams` — Team registrations (PK: `team_id`)
+  - `aais-hackathon-panelists` — Panelist credentials (PK: `panelist_id`)
+  - `aais-hackathon-scores` — Scoring data (PK: `team_id`, SK: `panelist_id`)
+  - `aais-hackathon-use-cases` — Hackathon scenarios (PK: `use_case_id`)
+  - `aais-hackathon-judging-criteria` — Single document (PK: `criteria_id="main"`)
+- **IAM Permissions** — Lambda execution role with DynamoDB access
+- **Lambda Function** — Python 3.11 runtime setup
+- **API Gateway** — REST API with proxy integration
+- **S3 + CloudFront** — Static hosting configuration
+
 ## 📊 Judging Criteria
 
 Teams are scored like S.P.E.C.I.A.L. stats, but for cloud solutions:
@@ -117,7 +134,8 @@ aais2026euchackathon/
 │   ├── seed_use_cases.py  # Initial data population
 │   └── stream_handler.py  # Event streaming utilities
 ├── backups/               # DynamoDB snapshots
-└── AGENTS.md              # Warp AI guidance file
+├── AGENTS.md              # Warp AI guidance file
+└── INFRASTRUCTURE.md      # AWS deployment guide
 ```
 
 ## 🤝 Contributing
