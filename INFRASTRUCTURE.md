@@ -294,7 +294,20 @@ The API includes admin-only routes for managing teams and panelists:
 |--------|------|-------------|
 | PUT | `/teams/{team_id}/reset-password` | Reset a team's password |
 | DELETE | `/teams/{team_id}` | Delete team and all associated scores |
+| GET | `/panelists` | List all panelists |
+| POST | `/panelists` | Create a new panelist |
 | PUT | `/panelists/{panelist_id}/reset-password` | Reset a panelist's password |
+| PUT | `/panelists/{panelist_id}/toggle-admin` | Toggle admin status |
+
+**Create Panelist Request Body:**
+```json
+{
+  "panelist_id": "login-username",
+  "name": "Display Name",
+  "password": "minimum-6-characters",
+  "is_admin": false
+}
+```
 
 **Reset Password Request Body:**
 ```json
@@ -303,7 +316,7 @@ The API includes admin-only routes for managing teams and panelists:
 }
 ```
 
-**Note:** These routes require admin authentication (panelist with `is_admin=true`).
+**Note:** These routes require admin authentication (panelist with `is_admin=true`). Admins cannot toggle their own admin status.
 
 ---
 

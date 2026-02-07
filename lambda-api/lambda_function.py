@@ -211,12 +211,28 @@ def lambda_handler(event, context):
             team_id = path.split('/')[-1]
             return admin_delete_team(team_id)
         
-        # Admin-only panelist password reset
+        # Admin-only panelist management
+        if path == '/panelists' and http_method == 'GET':
+            if auth.get('type') != 'panelist' or not auth.get('is_admin'):
+                return response(403, {'error': 'Forbidden - Admin access only'})
+            return get_all_panelists()
+        
+        if path == '/panelists' and http_method == 'POST':
+            if auth.get('type') != 'panelist' or not auth.get('is_admin'):
+                return response(403, {'error': 'Forbidden - Admin access only'})
+            return create_panelist(body)
+        
         if path.startswith('/panelists/') and path.endswith('/reset-password') and http_method == 'PUT':
             if auth.get('type') != 'panelist' or not auth.get('is_admin'):
                 return response(403, {'error': 'Forbidden - Admin access only'})
             panelist_id = path.split('/')[2]
             return admin_reset_panelist_password(panelist_id, body)
+        
+        if path.startswith('/panelists/') and path.endswith('/toggle-admin') and http_method == 'PUT':
+            if auth.get('type') != 'panelist' or not auth.get('is_admin'):
+                return response(403, {'error': 'Forbidden - Admin access only'})
+            panelist_id = path.split('/')[2]
+            return toggle_panelist_admin(panelist_id, auth['panelist_id'])
         
         return response(404, {'error': 'Not found'})
         
@@ -815,5 +831,91 @@ def admin_reset_panelist_password(panelist_id, body):
         )
         
         return response(200, {'message': f'Password reset successfully for panelist {panelist_id}'})
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+def get_all_panelists():
+    """Get all panelists (admin only)"""
+    try:
+        result = panelists_table.scan()
+        panelists = result.get('Items', [])
+        
+        # Remove passwords from response
+        for panelist in panelists:
+            panelist.pop('password', None)
+        
+        return response(200, {'panelists': panelists})
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+def create_panelist(body):
+    """Create a new panelist (admin only)"""
+    panelist_id = body.get('panelist_id', '').lower().strip().replace(' ', '-')
+    name = body.get('name', '')
+    password = body.get('password', '')
+    is_admin = body.get('is_admin', False)
+    
+    if not panelist_id or not password or not name:
+        return response(400, {'error': 'panelist_id, name, and password required'})
+    
+    if len(password) < 6:
+        return response(400, {'error': 'Password must be at least 6 characters'})
+    
+    try:
+        # Check if panelist exists
+        result = panelists_table.get_item(Key={'panelist_id': panelist_id})
+        if result.get('Item'):
+            return response(409, {'error': 'Panelist ID already exists'})
+        
+        # Create panelist
+        panelists_table.put_item(Item={
+            'panelist_id': panelist_id,
+            'name': name,
+            'password': password,
+            'is_admin': is_admin,
+            'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+            'updated_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        })
+        
+        return response(201, {
+            'message': 'Panelist created successfully',
+            'panelist_id': panelist_id,
+            'name': name,
+            'is_admin': is_admin
+        })
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+def toggle_panelist_admin(panelist_id, current_admin_id):
+    """Toggle admin status for a panelist (admin only)"""
+    # Prevent admin from demoting themselves
+    if panelist_id == current_admin_id:
+        return response(400, {'error': 'Cannot modify your own admin status'})
+    
+    try:
+        # Check if panelist exists
+        result = panelists_table.get_item(Key={'panelist_id': panelist_id})
+        if not result.get('Item'):
+            return response(404, {'error': 'Panelist not found'})
+        
+        current_status = result['Item'].get('is_admin', False)
+        new_status = not current_status
+        
+        # Update admin status
+        panelists_table.update_item(
+            Key={'panelist_id': panelist_id},
+            UpdateExpression='SET is_admin = :ia, updated_at = :ua',
+            ExpressionAttributeValues={
+                ':ia': new_status,
+                ':ua': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            }
+        )
+        
+        status_text = 'promoted to admin' if new_status else 'demoted from admin'
+        return response(200, {
+            'message': f'Panelist {panelist_id} {status_text}',
+            'panelist_id': panelist_id,
+            'is_admin': new_status
+        })
     except Exception as e:
         return response(500, {'error': str(e)})

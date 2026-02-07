@@ -1546,47 +1546,204 @@
 
         // ========== ADMIN PANELIST MANAGEMENT FUNCTIONS ==========
 
+        let allPanelists = [];
+
         async function loadPanelists() {
-            // Note: We don't have a /panelists endpoint, so we'll use a simple approach
-            // For now, show current panelist only - in a full implementation you'd add a GET /panelists admin route
-            return [{ panelist_id: panelistId, name: localStorage.getItem('panelistName') }];
+            try {
+                const res = await fetch(`${API_URL}/panelists`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (!res.ok) return [];
+                const data = await res.json();
+                return data.panelists || [];
+            } catch (err) {
+                console.error('Error loading panelists:', err);
+                return [];
+            }
         }
 
         async function renderAdminPanelists() {
             const container = document.getElementById('admin-panelists-list');
+            allPanelists = await loadPanelists();
             
-            container.innerHTML = `
+            let html = `
+                <!-- Create New Panelist -->
                 <div class="use-case-admin-card">
                     <div class="use-case-admin-header">
-                        <div class="use-case-admin-title">
-                            Reset Any Panelist Password
-                        </div>
+                        <div class="use-case-admin-title">➕ Create New Panelist</div>
                     </div>
                     <div style="margin-top: 10px; padding: 10px; border: 1px solid #336633;">
                         <div class="admin-form-group">
-                            <label>Panelist ID:</label>
-                            <input type="text" id="reset-panelist-id" placeholder="Enter panelist ID">
+                            <label>Panelist ID (login username):</label>
+                            <input type="text" id="new-panelist-id" placeholder="e.g., john-smith">
                         </div>
                         <div class="admin-form-group">
-                            <label>New Password (min 6 characters):</label>
-                            <input type="password" id="reset-panelist-pw" placeholder="Enter new password">
+                            <label>Display Name:</label>
+                            <input type="text" id="new-panelist-name" placeholder="e.g., John Smith">
                         </div>
-                        <button class="btn btn-admin" onclick="resetPanelistPassword()">🔑 RESET PANELIST PASSWORD</button>
-                        <div id="reset-panelist-status" class="admin-status hidden"></div>
+                        <div class="admin-form-group">
+                            <label>Password (min 6 characters):</label>
+                            <input type="password" id="new-panelist-pw" placeholder="Enter password">
+                        </div>
+                        <div class="admin-form-group">
+                            <label>
+                                <input type="checkbox" id="new-panelist-admin"> Grant Admin Privileges
+                            </label>
+                        </div>
+                        <button class="btn btn-admin" onclick="createPanelist()">CREATE PANELIST</button>
+                        <div id="create-panelist-status" class="admin-status hidden"></div>
                     </div>
                 </div>
+
+                <!-- Existing Panelists -->
+                <h3 style="color: #ffcc66; margin: 20px 0 10px 0;">EXISTING PANELISTS</h3>
             `;
+
+            if (allPanelists.length === 0) {
+                html += '<p style="color: #66aa66;">No panelists found.</p>';
+            } else {
+                html += allPanelists.map(p => {
+                    const isSelf = p.panelist_id === panelistId;
+                    const adminBadge = p.is_admin ? '<span style="color: #ffcc66;"> [ADMIN]</span>' : '';
+                    const toggleBtn = isSelf 
+                        ? '<span style="color: #666666; font-size: 14px;">(cannot modify self)</span>'
+                        : `<button class="btn btn-small ${p.is_admin ? 'btn-danger' : 'btn-admin'}" 
+                             onclick="togglePanelistAdmin('${p.panelist_id}')" 
+                             style="${p.is_admin ? 'border-color: #ff6666; color: #ff6666;' : ''}">
+                             ${p.is_admin ? '⬇ DEMOTE' : '⬆ PROMOTE TO ADMIN'}
+                           </button>`;
+                    
+                    return `
+                        <div class="use-case-admin-card" id="panelist-card-${p.panelist_id}">
+                            <div class="use-case-admin-header">
+                                <div class="use-case-admin-title">
+                                    ${p.name || p.panelist_id}${adminBadge}
+                                    <span style="color: #66aa66; font-size: 14px;"> (${p.panelist_id})</span>
+                                    ${isSelf ? '<span style="color: #88dd88; font-size: 14px;"> ← YOU</span>' : ''}
+                                </div>
+                                <div class="use-case-admin-actions">
+                                    ${toggleBtn}
+                                    <button class="btn btn-small btn-admin" onclick="showResetPanelistPasswordForm('${p.panelist_id}', '${(p.name || p.panelist_id).replace(/'/g, "\\'")}')">
+                                        🔑 RESET PW
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="reset-pw-panelist-form-${p.panelist_id}" class="hidden" style="margin-top: 10px; padding: 10px; border: 1px solid #aa8800;"></div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            container.innerHTML = html;
         }
 
-        async function resetPanelistPassword() {
-            const panelistIdToReset = document.getElementById('reset-panelist-id').value.trim().toLowerCase().replace(' ', '-');
-            const newPassword = document.getElementById('reset-panelist-pw').value;
-            const statusEl = document.getElementById('reset-panelist-status');
+        async function createPanelist() {
+            const statusEl = document.getElementById('create-panelist-status');
+            const panelistId = document.getElementById('new-panelist-id').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const name = document.getElementById('new-panelist-name').value.trim();
+            const password = document.getElementById('new-panelist-pw').value;
+            const isAdmin = document.getElementById('new-panelist-admin').checked;
 
-            if (!panelistIdToReset) {
-                showAdminStatus(statusEl, 'ERROR: Panelist ID required', 'error');
+            if (!panelistId || !name) {
+                showAdminStatus(statusEl, 'ERROR: Panelist ID and Name required', 'error');
                 return;
             }
+
+            if (!password || password.length < 6) {
+                showAdminStatus(statusEl, 'ERROR: Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/panelists`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        panelist_id: panelistId,
+                        name: name,
+                        password: password,
+                        is_admin: isAdmin
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showAdminStatus(statusEl, 'ERROR: ' + (data.error || 'Create failed'), 'error');
+                    return;
+                }
+
+                showAdminStatus(statusEl, `PANELIST "${name}" CREATED SUCCESSFULLY`, 'success');
+                document.getElementById('new-panelist-id').value = '';
+                document.getElementById('new-panelist-name').value = '';
+                document.getElementById('new-panelist-pw').value = '';
+                document.getElementById('new-panelist-admin').checked = false;
+                
+                // Refresh panelist list
+                await renderAdminPanelists();
+            } catch (err) {
+                showAdminStatus(statusEl, 'ERROR: Connection failed', 'error');
+            }
+        }
+
+        async function togglePanelistAdmin(panelistIdToToggle) {
+            const panelist = allPanelists.find(p => p.panelist_id === panelistIdToToggle);
+            const action = panelist?.is_admin ? 'demote' : 'promote to admin';
+            
+            if (!confirm(`Are you sure you want to ${action} panelist "${panelist?.name || panelistIdToToggle}"?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/panelists/${panelistIdToToggle}/toggle-admin`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert('ERROR: ' + (data.error || 'Toggle failed'));
+                    return;
+                }
+
+                alert(data.message);
+                await renderAdminPanelists();
+            } catch (err) {
+                alert('ERROR: Connection failed');
+            }
+        }
+
+        function showResetPanelistPasswordForm(panelistIdToReset, panelistName) {
+            const formContainer = document.getElementById(`reset-pw-panelist-form-${panelistIdToReset}`);
+            
+            formContainer.innerHTML = `
+                <h4 style="color: #ffcc66; margin-bottom: 10px;">Reset Password for ${panelistName}</h4>
+                <div class="admin-form-group">
+                    <label>New Password (min 6 characters):</label>
+                    <input type="password" id="new-pw-panelist-${panelistIdToReset}" placeholder="Enter new password">
+                </div>
+                <button class="btn btn-admin btn-small" onclick="resetPanelistPasswordById('${panelistIdToReset}')">CONFIRM RESET</button>
+                <button class="btn btn-small" onclick="hideResetPanelistPasswordForm('${panelistIdToReset}')">CANCEL</button>
+                <div id="reset-pw-panelist-status-${panelistIdToReset}" class="admin-status hidden"></div>
+            `;
+            formContainer.classList.remove('hidden');
+        }
+
+        function hideResetPanelistPasswordForm(panelistIdToReset) {
+            const formContainer = document.getElementById(`reset-pw-panelist-form-${panelistIdToReset}`);
+            formContainer.classList.add('hidden');
+            formContainer.innerHTML = '';
+        }
+
+        async function resetPanelistPasswordById(panelistIdToReset) {
+            const newPassword = document.getElementById(`new-pw-panelist-${panelistIdToReset}`).value;
+            const statusEl = document.getElementById(`reset-pw-panelist-status-${panelistIdToReset}`);
 
             if (!newPassword || newPassword.length < 6) {
                 showAdminStatus(statusEl, 'ERROR: Password must be at least 6 characters', 'error');
@@ -1610,9 +1767,8 @@
                     return;
                 }
 
-                showAdminStatus(statusEl, `PASSWORD RESET SUCCESSFULLY FOR ${panelistIdToReset}`, 'success');
-                document.getElementById('reset-panelist-id').value = '';
-                document.getElementById('reset-panelist-pw').value = '';
+                showAdminStatus(statusEl, 'PASSWORD RESET SUCCESSFULLY', 'success');
+                setTimeout(() => hideResetPanelistPasswordForm(panelistIdToReset), 1500);
             } catch (err) {
                 showAdminStatus(statusEl, 'ERROR: Connection failed', 'error');
             }
