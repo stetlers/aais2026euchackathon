@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAIS 2026 EUC Hackathon - Panelist Dashboard</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('pre-war-new-vegas-is-absolutely-stunning-i-am-in-sheer-awe-v0-gqg29pm5z0kf1.jpg.webp') center center;
+            background-size: cover;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.85) 100%);
+            z-index: -1;
+        }
+
+        .monitor {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), 0 0 100px rgba(0,255,0,0.1), inset 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+            border: 3px solid #333;
+        }
+
+        .screen {
+            background: #001200;
+            border-radius: 20px;
+            padding: 30px;
+            width: 900px;
+            max-width: 95vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: inset 0 0 100px rgba(0,50,0,0.3), 0 0 20px rgba(0,255,0,0.1);
+        }
+
+        .terminal {
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            color: #33ff33;
+            text-shadow: 0 0 2px #33ff33;
+            line-height: 1.4;
+        }
+
+        h1 { font-size: 26px; margin-bottom: 10px; text-align: center; color: #ccffcc; text-shadow: 0 0 3px #66ff66; }
+        h2 { font-size: 20px; margin: 15px 0 10px 0; color: #aaffaa; border-bottom: 1px solid #336633; padding-bottom: 8px; }
+        h3 { font-size: 18px; margin: 10px 0 8px 0; color: #88dd88; }
+
+        .welcome { text-align: center; margin-bottom: 15px; color: #aaffaa; }
+
+        .team-card {
+            background: rgba(0,30,0,0.4);
+            border: 1px solid #336633;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .team-card.expanded { border-color: #66ff66; }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .team-header:hover { color: #ccffcc; }
+
+        .team-name { font-size: 20px; color: #88ff88; }
+        .team-use-case { color: #66aa66; font-size: 16px; }
+
+        .team-details { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #336633; }
+        .team-card.expanded .team-details { display: block; }
+
+        .detail-section { margin-bottom: 15px; }
+        .detail-label { color: #66aa66; margin-bottom: 5px; }
+        .detail-value { color: #aaffaa; padding-left: 10px; }
+
+        .members-list { padding-left: 10px; }
+        .member-item { margin: 5px 0; }
+
+        .services-tags { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 10px; }
+        .service-tag { background: rgba(0,80,0,0.3); border: 1px solid #448844; padding: 3px 8px; font-size: 16px; }
+
+        .scoring-section {
+            background: rgba(0,50,0,0.3);
+            border: 1px solid #448844;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .scoring-section h3 { margin-top: 0; color: #aaffaa; }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            gap: 15px;
+        }
+
+        .score-label { width: 200px; color: #88dd88; }
+
+        .score-input {
+            display: flex;
+            gap: 5px;
+        }
+
+        .score-btn {
+            width: 35px;
+            height: 35px;
+            background: transparent;
+            border: 1px solid #336633;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .score-btn:hover { border-color: #66ff66; background: rgba(0,255,0,0.1); }
+        .score-btn.selected { background: rgba(0,255,0,0.3); border-color: #66ff66; color: #ccffcc; }
+
+        .comments-input {
+            width: 100%;
+            background: rgba(0,50,0,0.3);
+            border: 1px solid #336633;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            padding: 8px;
+            margin-top: 10px;
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .comments-input:focus { border-color: #66ff66; outline: none; }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover { background: rgba(0,255,0,0.2); color: #ccffcc; }
+
+        .total-score {
+            text-align: right;
+            font-size: 20px;
+            color: #ccffcc;
+            margin-top: 10px;
+        }
+
+        .status { margin: 10px 0; padding: 8px; border: 1px solid #336633; font-size: 16px; }
+        .status.success { border-color: #44aa44; color: #66ff66; }
+        .status.error { border-color: #aa4444; color: #ff6666; }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #336633;
+        }
+
+        .nav-links a { color: #66aa66; text-decoration: none; }
+        .nav-links a:hover { color: #aaffaa; }
+
+        .power-led {
+            position: absolute;
+            bottom: 15px;
+            right: 50px;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff00;
+            animation: led-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes led-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .loading { text-align: center; padding: 40px; color: #66aa66; }
+
+        .no-teams { text-align: center; color: #66aa66; padding: 30px; }
+
+        .expand-icon { font-size: 20px; }
+
+        .already-scored { color: #66aa66; font-size: 14px; }
+
+        .leaderboard {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,30,0,0.4);
+            border: 1px solid #448844;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #223322;
+        }
+
+        .leaderboard-item:last-child { border-bottom: none; }
+
+        .rank { color: #ffcc00; width: 30px; }
+        .lb-team { flex: 1; }
+        .lb-score { color: #66ff66; width: 60px; text-align: right; }
+
+        /* Use Case Popup */
+        .use-case-trigger {
+            cursor: help;
+            border-bottom: 1px dashed #66aa66;
+            position: relative;
+        }
+        .use-case-trigger:hover { color: #aaffaa; }
+
+        .use-case-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #001a00;
+            border: 2px solid #44aa44;
+            box-shadow: 0 0 30px rgba(0,255,0,0.3), 0 0 60px rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 25px;
+            font-family: 'VT323', monospace;
+        }
+
+        .use-case-popup.visible { display: block; }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+
+        .popup-overlay.visible { display: block; }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #336633;
+        }
+
+        .popup-title {
+            font-size: 22px;
+            color: #88ff88;
+        }
+
+        .popup-close {
+            background: transparent;
+            border: 1px solid #ff6666;
+            color: #ff6666;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+
+        .popup-close:hover { background: rgba(255,0,0,0.2); }
+
+        .popup-content { color: #33ff33; font-size: 17px; line-height: 1.5; }
+        .popup-content h3 { color: #aaffaa; font-size: 18px; margin: 15px 0 8px 0; border-bottom: 1px solid #336633; padding-bottom: 5px; }
+        .popup-content p { margin-bottom: 10px; }
+        .popup-content ul { margin: 8px 0 12px 20px; }
+        .popup-content li { margin-bottom: 5px; }
+        .popup-content .quote { color: #88dd88; font-style: italic; padding: 10px; border-left: 3px solid #44aa44; margin: 10px 0; background: rgba(0,100,0,0.1); }
+        .popup-content .archetype { color: #ffcc66; font-size: 16px; }
+        .popup-content .focus-title { color: #ffcc66; font-size: 19px; }
+
+        /* Admin Section Styles */
+        .admin-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(50,30,0,0.3);
+            border: 2px solid #aa8800;
+        }
+
+        .admin-section h2 {
+            color: #ffcc66;
+            border-bottom-color: #aa8800;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: #aa8800;
+            color: #001200;
+            padding: 2px 8px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+        .use-case-admin-card {
+            background: rgba(0,30,0,0.4);
+            border: 1px solid #336633;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .use-case-admin-card.editing {
+            border-color: #ffcc66;
+        }
+
+        .use-case-admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .use-case-admin-title {
+            font-size: 18px;
+            color: #88ff88;
+        }
+
+        .use-case-admin-actions button {
+            margin-left: 8px;
+        }
+
+        .admin-form-group {
+            margin-bottom: 12px;
+        }
+
+        .admin-form-group label {
+            display: block;
+            margin-bottom: 4px;
+            color: #aaffaa;
+            font-size: 16px;
+        }
+
+        .admin-form-group input,
+        .admin-form-group textarea {
+            width: 100%;
+            background: rgba(0,50,0,0.3);
+            border: 1px solid #336633;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            padding: 8px;
+        }
+
+        .admin-form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .admin-form-group input:focus,
+        .admin-form-group textarea:focus {
+            border-color: #66ff66;
+            outline: none;
+        }
+
+        .btn-admin {
+            border-color: #ffcc66;
+            color: #ffcc66;
+        }
+
+        .btn-admin:hover {
+            background: rgba(255,200,0,0.2);
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .admin-status {
+            margin-top: 10px;
+            padding: 8px;
+            font-size: 16px;
+        }
+
+        .admin-status.success { border: 1px solid #44aa44; color: #66ff66; }
+        .admin-status.error { border: 1px solid #aa4444; color: #ff6666; }
+
+        .hidden { display: none; }
+
+        .quick-links {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,50,0,0.3);
+            border: 1px solid #336633;
+        }
+
+        .clickable-link {
+            color: #66ff66;
+            cursor: pointer;
+            border-bottom: 1px dashed #66aa66;
+        }
+        .clickable-link:hover { color: #aaffaa; }
+
+        /* Judging Criteria Popup */
+        .judging-popup {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 750px;
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: #001a00;
+            border: 2px solid #44aa44;
+            box-shadow: 0 0 30px rgba(0,255,0,0.3), 0 0 60px rgba(0,0,0,0.8);
+            z-index: 1001;
+            padding: 25px;
+            font-family: 'VT323', monospace;
+        }
+        .judging-popup.visible { display: block; }
+        .judging-popup .popup-content h3 { color: #aaffaa; font-size: 18px; margin: 15px 0 8px 0; border-bottom: 1px solid #336633; padding-bottom: 5px; }
+        .judging-popup .popup-content p { margin-bottom: 10px; color: #33ff33; }
+        .judging-popup .popup-content ul { margin: 8px 0 12px 20px; color: #33ff33; }
+        .judging-popup .popup-content li { margin-bottom: 5px; }
+        .judging-popup .quote { color: #88dd88; font-style: italic; padding: 10px; border-left: 3px solid #44aa44; margin: 10px 0; background: rgba(0,100,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="monitor">
+        <div class="screen">
+            <div class="terminal">
+                <h1>>>> PANELIST DASHBOARD <<<</h1>
+                <div id="welcome" class="welcome"></div>
+
+                <div id="loading" class="loading">LOADING TEAMS...</div>
+
+                <div id="dashboard" style="display: none;">
+                    <!-- Quick Links -->
+                    <div class="quick-links">
+                        <span class="clickable-link" onclick="showJudgingCriteriaPopup()">📋 View Judging Criteria</span>
+                    </div>
+
+                    <h2>REGISTERED TEAMS</h2>
+                    <div id="teams-list"></div>
+
+                    <div id="leaderboard-section" style="display: none;">
+                        <h2>CURRENT STANDINGS</h2>
+                        <div id="leaderboard" class="leaderboard"></div>
+                    </div>
+
+                    <!-- Admin Section - Only visible to admins -->
+                    <div id="admin-section" class="admin-section hidden">
+                        <h2>JUDGING CRITERIA MANAGEMENT <span class="admin-badge">ADMIN</span></h2>
+                        <p style="color: #aa8800; margin-bottom: 15px;">Edit the judging criteria that teams see.</p>
+                        <button class="btn btn-admin" onclick="showEditJudgingCriteriaForm()">✏️ EDIT JUDGING CRITERIA</button>
+                        <div id="edit-judging-form" class="hidden" style="margin-top: 15px; padding: 15px; border: 1px solid #aa8800;"></div>
+
+                        <h2 style="margin-top: 25px;">USE CASE MANAGEMENT <span class="admin-badge">ADMIN</span></h2>
+                        <p style="color: #aa8800; margin-bottom: 15px;">As an admin, you can add, edit, and delete use cases.</p>
+                        
+                        <div id="admin-use-cases-list"></div>
+                        
+                        <button class="btn btn-admin" onclick="showAddUseCaseForm()">+ ADD NEW USE CASE</button>
+                        
+                        <div id="add-use-case-form" class="hidden" style="margin-top: 15px; padding: 15px; border: 1px solid #aa8800;">
+                            <h3 style="color: #ffcc66; margin-bottom: 15px;">NEW USE CASE</h3>
+                            <div class="admin-form-group">
+                                <label>Name:</label>
+                                <input type="text" id="new-uc-name" placeholder="e.g., Vault-Tec Corporation">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Archetype:</label>
+                                <input type="text" id="new-uc-archetype" placeholder="e.g., Secrecy-Driven">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Quote:</label>
+                                <input type="text" id="new-uc-quote" placeholder="The main tagline quote">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Background:</label>
+                                <textarea id="new-uc-background" placeholder="Company background description"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Business Reality:</label>
+                                <textarea id="new-uc-reality" placeholder="Current business challenges"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>User Persona:</label>
+                                <textarea id="new-uc-persona" placeholder="Name (Role) — Description"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Stakeholder Tension:</label>
+                                <textarea id="new-uc-tension" placeholder="Describe the conflicting priorities"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Evaluation Focus:</label>
+                                <input type="text" id="new-uc-focus" placeholder="e.g., Control, Trust Boundaries, and Institutional Memory">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Challenges (one per line):</label>
+                                <textarea id="new-uc-challenges" placeholder="Challenge 1&#10;Challenge 2&#10;Challenge 3"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Values (one per line):</label>
+                                <textarea id="new-uc-values" placeholder="Value 1&#10;Value 2&#10;Value 3"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Closing Statement:</label>
+                                <textarea id="new-uc-closing" placeholder="Final thematic statement"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>ASCII Logo (raw ASCII art, no &lt;pre&gt; tags):</label>
+                                <textarea id="new-uc-ascii-logo" rows="12" style="font-family: monospace; font-size: 11px; white-space: pre;" placeholder="Paste ASCII art here"></textarea>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Loading Message (shown when selecting use case):</label>
+                                <input type="text" id="new-uc-loading-message" placeholder="e.g., Loading secret protocols... Please stand by.">
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Sort Order:</label>
+                                <input type="number" id="new-uc-sort-order" value="1" min="1">
+                            </div>
+                            <button class="btn btn-admin" onclick="createUseCase()">CREATE USE CASE</button>
+                            <button class="btn" onclick="hideAddUseCaseForm()">CANCEL</button>
+                            <div id="add-uc-status" class="admin-status hidden"></div>
+                        </div>
+                    </div>
+
+                    <div class="nav-links">
+                        <a href="terminal.html">← View Use Cases</a>
+                        <a href="#" onclick="logout()">LOGOUT →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="power-led"></div>
+    </div>
+
+    <!-- Use Case Popup -->
+    <div class="popup-overlay" id="popup-overlay" onclick="closeAllPopups()"></div>
+    <div class="use-case-popup" id="use-case-popup">
+        <div class="popup-header">
+            <div class="popup-title" id="popup-title"></div>
+            <button class="popup-close" onclick="closeUseCasePopup()">✕ CLOSE</button>
+        </div>
+        <div class="popup-content" id="popup-content"></div>
+    </div>
+
+    <!-- Judging Criteria Popup -->
+    <div class="judging-popup" id="judging-popup">
+        <div class="popup-header">
+            <div class="popup-title">JUDGING CRITERIA</div>
+            <button class="popup-close" onclick="closeJudgingPopup()">✕ CLOSE</button>
+        </div>
+        <div class="popup-content" id="judging-popup-content">Loading...</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://fc4xp2lydj.execute-api.us-east-1.amazonaws.com/prod';
+        let teams = [];
+        let scores = {};
+        let panelistId = '';
+        let isAdmin = false;
+        let useCasesData = []; // Raw data from API
+        let USE_CASE_NAMES = {}; // Will be populated from API
+        let USE_CASE_DETAILS = {}; // Will be populated from API
+        let judgingCriteriaData = null; // Will be populated from API
+
+        // Fetch use cases from API
+        async function loadUseCases() {
+            try {
+                const res = await fetch(`${API_URL}/use-cases`);
+                if (!res.ok) throw new Error('Failed to fetch use cases');
+                const data = await res.json();
+                
+                useCasesData = data.use_cases
+                    .filter(uc => uc.active !== false)
+                    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+                
+                // Build USE_CASE_NAMES and USE_CASE_DETAILS from API data
+                useCasesData.forEach((uc, idx) => {
+                    const num = idx + 1;
+                    USE_CASE_NAMES[num] = uc.name;
+                    USE_CASE_DETAILS[num] = {
+                        id: uc.use_case_id,
+                        name: uc.name,
+                        archetype: uc.archetype,
+                        quote: uc.quote,
+                        background: uc.background,
+                        reality: uc.reality,
+                        persona: uc.persona,
+                        tension: uc.tension,
+                        focus: uc.focus,
+                        challenges: uc.challenges || [],
+                        values: uc.values || []
+                    };
+                });
+            } catch (err) {
+                console.error('Error loading use cases:', err);
+            }
+        }
+
+        // Load all use cases for admin (including inactive)
+        async function loadAllUseCasesForAdmin() {
+            try {
+                const res = await fetch(`${API_URL}/use-cases`);
+                if (!res.ok) throw new Error('Failed to fetch use cases');
+                const data = await res.json();
+                return data.use_cases.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+            } catch (err) {
+                console.error('Error loading use cases for admin:', err);
+                return [];
+            }
+        }
+
+        function showUseCasePopup(useCaseNum) {
+            const details = USE_CASE_DETAILS[useCaseNum];
+            if (!details) return;
+
+            document.getElementById('popup-title').innerHTML = `${details.name} <span class="archetype">[${details.archetype}]</span>`;
+            document.getElementById('popup-content').innerHTML = `
+                <div class="quote">"${details.quote}"</div>
+                <h3>BACKGROUND</h3>
+                <p>${details.background}</p>
+                <h3>BUSINESS REALITY</h3>
+                <p>${details.reality}</p>
+                <h3>USER PERSONA</h3>
+                <p>${details.persona}</p>
+                <h3>STAKEHOLDER TENSION</h3>
+                <p>${details.tension}</p>
+                <h3 class="focus-title">EVALUATION FOCUS: ${details.focus}</h3>
+                <p>Your challenge is to demonstrate how ${details.name} can:</p>
+                <ul>${details.challenges.map(c => `<li>${c}</li>`).join('')}</ul>
+                <p>The panel values:</p>
+                <ul>${details.values.map(v => `<li>${v}</li>`).join('')}</ul>
+            `;
+
+            document.getElementById('popup-overlay').classList.add('visible');
+            document.getElementById('use-case-popup').classList.add('visible');
+        }
+
+        function closeUseCasePopup() {
+            document.getElementById('popup-overlay').classList.remove('visible');
+            document.getElementById('use-case-popup').classList.remove('visible');
+        }
+
+        function closeJudgingPopup() {
+            document.getElementById('popup-overlay').classList.remove('visible');
+            document.getElementById('judging-popup').classList.remove('visible');
+        }
+
+        function closeAllPopups() {
+            closeUseCasePopup();
+            closeJudgingPopup();
+        }
+
+        async function showJudgingCriteriaPopup() {
+            document.getElementById('popup-overlay').classList.add('visible');
+            document.getElementById('judging-popup').classList.add('visible');
+
+            if (!judgingCriteriaData) {
+                try {
+                    const res = await fetch(`${API_URL}/judging-criteria`);
+                    judgingCriteriaData = await res.json();
+                } catch (err) {
+                    document.getElementById('judging-popup-content').innerHTML = '<p style="color: #ff6666;">Error loading judging criteria.</p>';
+                    return;
+                }
+            }
+
+            renderJudgingCriteriaContent();
+        }
+
+        function renderJudgingCriteriaContent() {
+            const jc = judgingCriteriaData;
+            let html = `<div class="quote">${jc.intro}</div>`;
+
+            // Categories
+            if (jc.categories) {
+                jc.categories.forEach((cat, idx) => {
+                    html += `<h3>CATEGORY ${idx + 1}: ${cat.name.toUpperCase()} (${cat.points} Points)</h3>`;
+                    html += `<p>${cat.description}</p>`;
+                    if (cat.items && cat.items.length > 0) {
+                        html += '<ul>' + cat.items.map(item => '<li>' + item + '</li>').join('') + '</ul>';
+                    }
+                });
+            }
+
+            // Required Tool
+            if (jc.required_tool) {
+                html += `<h3>REQUIRED TOOL: ${jc.required_tool.name.toUpperCase()}</h3>`;
+                html += `<p>${jc.required_tool.description}</p>`;
+                if (jc.required_tool.features && jc.required_tool.features.length > 0) {
+                    html += '<ul>' + jc.required_tool.features.map(f => '<li>' + f + '</li>').join('') + '</ul>';
+                }
+                if (jc.required_tool.note) {
+                    html += `<p>${jc.required_tool.note}</p>`;
+                }
+            }
+
+            // Expected Services
+            if (jc.expected_services) {
+                html += `<h3>EXPECTED AWS SERVICES</h3>`;
+                html += `<p>${jc.expected_services.description}</p>`;
+                if (jc.expected_services.services && jc.expected_services.services.length > 0) {
+                    html += '<ul>' + jc.expected_services.services.map(s => '<li>' + s + '</li>').join('') + '</ul>';
+                }
+                if (jc.expected_services.note) {
+                    html += `<p>${jc.expected_services.note}</p>`;
+                }
+            }
+
+            // Closing
+            if (jc.closing) {
+                html += `<p style="margin-top: 20px; font-style: italic; color: #88dd88; border-top: 1px solid #336633; padding-top: 15px;">${jc.closing}</p>`;
+            }
+
+            document.getElementById('judging-popup-content').innerHTML = html;
+        }
+
+        // Close popup on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAllPopups();
+        });
+
+        const SCORE_CATEGORIES = ['presentation', 'innovation', 'functionality', 'aws_well_architected'];
+        const CATEGORY_LABELS = {
+            presentation: 'Presentation (1-5)',
+            innovation: 'Innovation (1-5)',
+            functionality: 'Functionality (1-5)',
+            aws_well_architected: 'AWS Well-Architected (1-5)'
+        };
+
+        window.onload = async function() {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            
+            if (!token || userType !== 'panelist') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            panelistId = localStorage.getItem('panelistId');
+            isAdmin = localStorage.getItem('isAdmin') === 'true';
+            
+            const welcomeText = `Welcome, ${localStorage.getItem('panelistName')}`;
+            document.getElementById('welcome').textContent = isAdmin 
+                ? welcomeText + ' [ADMIN]' 
+                : welcomeText;
+
+            // Load use cases first, then data
+            await loadUseCases();
+            await loadData();
+
+            // Show admin section if user is admin
+            if (isAdmin) {
+                document.getElementById('admin-section').classList.remove('hidden');
+                await renderAdminUseCases();
+            }
+        };
+
+        async function loadData() {
+            try {
+                // Load teams and scores in parallel
+                const [teamsRes, scoresRes] = await Promise.all([
+                    fetch(`${API_URL}/teams`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    }),
+                    fetch(`${API_URL}/scores`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    })
+                ]);
+
+                if (teamsRes.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const teamsData = await teamsRes.json();
+                teams = teamsData.teams || teamsData || [];
+                const scoresData = await scoresRes.json();
+
+                // Index my scores by team_id (filter from all_scores by panelist_id)
+                const allScores = scoresData.all_scores || [];
+                const myScores = allScores.filter(s => s.panelist_id === panelistId);
+                myScores.forEach(s => {
+                    scores[s.team_id] = s;
+                });
+
+                renderTeams();
+                renderLeaderboard(scoresData.leaderboard || []);
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').textContent = 'ERROR: Failed to load data';
+            }
+        }
+
+        function renderTeams() {
+            const container = document.getElementById('teams-list');
+            
+            if (teams.length === 0) {
+                container.innerHTML = '<div class="no-teams">No teams registered yet.</div>';
+                return;
+            }
+
+            container.innerHTML = teams.map(team => {
+                const existingScore = scores[team.team_id];
+                const useCaseName = team.use_case ? USE_CASE_NAMES[team.use_case] : 'Not selected';
+                const useCaseLink = team.use_case 
+                    ? `<span class="use-case-trigger" onclick="event.stopPropagation(); showUseCasePopup(${team.use_case})" title="Click for use case details">${useCaseName}</span>`
+                    : 'Not selected';
+                
+                return `
+                    <div class="team-card" id="team-${team.team_id}">
+                        <div class="team-header" onclick="toggleTeam('${team.team_id}')">
+                            <div>
+                                <div class="team-name">${team.team_name || team.team_id}</div>
+                                <div class="team-use-case">Use Case: ${useCaseLink}</div>
+                                ${existingScore ? '<div class="already-scored">✓ Scored: ' + existingScore.total + '/20</div>' : ''}
+                            </div>
+                            <div class="expand-icon">▶</div>
+                        </div>
+                        <div class="team-details">
+                            ${renderTeamDetails(team)}
+                            ${renderScoringSection(team, existingScore)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTeamDetails(team) {
+            const members = team.members || [];
+            const services = team.services_used || [];
+            
+            return `
+                <div class="detail-section">
+                    <div class="detail-label">TEAM MEMBERS:</div>
+                    <div class="members-list">
+                        ${members.length > 0 
+                            ? members.map(m => `<div class="member-item">• ${m.name}${m.role ? ' (' + m.role + ')' : ''}</div>`).join('')
+                            : '<div class="detail-value">No members listed</div>'
+                        }
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">SOLUTION:</div>
+                    <div class="detail-value">${team.solution_description || 'No description provided'}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">AWS SERVICES:</div>
+                    <div class="services-tags">
+                        ${services.length > 0 
+                            ? services.map(s => `<span class="service-tag">${s}</span>`).join('')
+                            : '<span class="detail-value">None listed</span>'
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScoringSection(team, existingScore) {
+            return `
+                <div class="scoring-section">
+                    <h3>SCORING</h3>
+                    ${SCORE_CATEGORIES.map(cat => `
+                        <div class="score-row">
+                            <div class="score-label">${CATEGORY_LABELS[cat]}</div>
+                            <div class="score-input">
+                                ${[1,2,3,4,5].map(n => `
+                                    <button class="score-btn ${existingScore && existingScore[cat] === n ? 'selected' : ''}" 
+                                            onclick="setScore('${team.team_id}', '${cat}', ${n})"
+                                            id="score-${team.team_id}-${cat}-${n}">${n}</button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                    <div class="detail-label" style="margin-top: 10px;">COMMENTS (optional):</div>
+                    <textarea class="comments-input" 
+                              id="comments-${team.team_id}"
+                              placeholder="Add any feedback for this team...">${existingScore?.comments || ''}</textarea>
+                    <div class="total-score">
+                        TOTAL: <span id="total-${team.team_id}">${existingScore?.total || 0}</span>/20
+                    </div>
+                    <button class="btn" onclick="submitScore('${team.team_id}')">>>> SUBMIT SCORE <<<</button>
+                    <div id="status-${team.team_id}" class="status" style="display: none;"></div>
+                </div>
+            `;
+        }
+
+        function toggleTeam(teamId) {
+            const card = document.getElementById(`team-${teamId}`);
+            const icon = card.querySelector('.expand-icon');
+            
+            if (card.classList.contains('expanded')) {
+                card.classList.remove('expanded');
+                icon.textContent = '▶';
+            } else {
+                // Close other expanded cards
+                document.querySelectorAll('.team-card.expanded').forEach(c => {
+                    c.classList.remove('expanded');
+                    c.querySelector('.expand-icon').textContent = '▶';
+                });
+                card.classList.add('expanded');
+                icon.textContent = '▼';
+            }
+        }
+
+        function setScore(teamId, category, value) {
+            // Initialize scores for this team if needed
+            if (!scores[teamId]) {
+                scores[teamId] = { team_id: teamId };
+            }
+            scores[teamId][category] = value;
+
+            // Update button states
+            [1,2,3,4,5].forEach(n => {
+                const btn = document.getElementById(`score-${teamId}-${category}-${n}`);
+                btn.classList.toggle('selected', n === value);
+            });
+
+            // Update total
+            updateTotal(teamId);
+        }
+
+        function updateTotal(teamId) {
+            const s = scores[teamId] || {};
+            const total = (s.presentation || 0) + (s.innovation || 0) + 
+                         (s.functionality || 0) + (s.aws_well_architected || 0);
+            document.getElementById(`total-${teamId}`).textContent = total;
+            return total;
+        }
+
+        async function submitScore(teamId) {
+            const s = scores[teamId];
+            
+            // Validate all scores are filled
+            if (!s || !s.presentation || !s.innovation || !s.functionality || !s.aws_well_architected) {
+                showStatus(teamId, 'ERROR: Please fill all score categories', 'error');
+                return;
+            }
+
+            const comments = document.getElementById(`comments-${teamId}`).value.trim();
+            const total = updateTotal(teamId);
+
+            try {
+                const res = await fetch(`${API_URL}/scores`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        team_id: teamId,
+                        presentation: s.presentation,
+                        innovation: s.innovation,
+                        functionality: s.functionality,
+                        aws_well_architected: s.aws_well_architected,
+                        comments: comments
+                    })
+                });
+
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showStatus(teamId, 'ERROR: ' + (data.error || 'Submit failed'), 'error');
+                    return;
+                }
+
+                showStatus(teamId, 'SCORE SUBMITTED SUCCESSFULLY', 'success');
+                
+                // Update local score data
+                scores[teamId] = { ...s, total, comments };
+                
+                // Refresh leaderboard
+                const scoresRes = await fetch(`${API_URL}/scores`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const scoresData = await scoresRes.json();
+                renderLeaderboard(scoresData.leaderboard || []);
+                
+            } catch (err) {
+                showStatus(teamId, 'ERROR: Connection failed', 'error');
+            }
+        }
+
+        function renderLeaderboard(leaderboard) {
+            const section = document.getElementById('leaderboard-section');
+            const container = document.getElementById('leaderboard');
+            
+            if (leaderboard.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            
+            // Sort by average total score descending
+            leaderboard.sort((a, b) => (b.avg_total || 0) - (a.avg_total || 0));
+
+            // Get team names from teams array
+            const teamNames = {};
+            teams.forEach(t => teamNames[t.team_id] = t.team_name || t.team_id);
+
+            container.innerHTML = leaderboard.map((item, index) => `
+                <div class="leaderboard-item">
+                    <span class="rank">#${index + 1}</span>
+                    <span class="lb-team">${teamNames[item.team_id] || item.team_id}</span>
+                    <span class="lb-score">${(item.avg_total || 0).toFixed(1)}/20</span>
+                </div>
+            `).join('');
+        }
+
+        function showStatus(teamId, message, type) {
+            const statusEl = document.getElementById(`status-${teamId}`);
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + type;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // ========== ADMIN FUNCTIONS ==========
+
+        async function renderAdminUseCases() {
+            const allUseCases = await loadAllUseCasesForAdmin();
+            const container = document.getElementById('admin-use-cases-list');
+            
+            if (allUseCases.length === 0) {
+                container.innerHTML = '<p style="color: #66aa66;">No use cases found.</p>';
+                return;
+            }
+
+            container.innerHTML = allUseCases.map(uc => `
+                <div class="use-case-admin-card" id="admin-uc-${uc.use_case_id}">
+                    <div class="use-case-admin-header">
+                        <div class="use-case-admin-title">
+                            ${uc.sort_order}. ${uc.name} 
+                            <span style="color: #ffcc66;">[${uc.archetype}]</span>
+                            ${uc.active === false ? '<span style="color: #ff6666;"> (INACTIVE)</span>' : ''}
+                        </div>
+                        <div class="use-case-admin-actions">
+                            <button class="btn btn-small btn-admin" onclick="editUseCase(${uc.use_case_id})">EDIT</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteUseCase(${uc.use_case_id}, '${uc.name.replace(/'/g, "\\'")}')">✕</button>
+                        </div>
+                    </div>
+                    <div id="edit-form-${uc.use_case_id}" class="hidden" style="margin-top: 10px;"></div>
+                </div>
+            `).join('');
+        }
+
+        function showAddUseCaseForm() {
+            document.getElementById('add-use-case-form').classList.remove('hidden');
+        }
+
+        function hideAddUseCaseForm() {
+            document.getElementById('add-use-case-form').classList.add('hidden');
+            // Clear form
+            ['name', 'archetype', 'quote', 'background', 'reality', 'persona', 'tension', 'focus', 'challenges', 'values', 'closing', 'ascii-logo', 'loading-message'].forEach(field => {
+                document.getElementById(`new-uc-${field}`).value = '';
+            });
+            document.getElementById('new-uc-sort-order').value = '1';
+        }
+
+        async function createUseCase() {
+            const statusEl = document.getElementById('add-uc-status');
+            const challenges = document.getElementById('new-uc-challenges').value.split('\n').filter(c => c.trim());
+            const values = document.getElementById('new-uc-values').value.split('\n').filter(v => v.trim());
+
+            const useCaseData = {
+                name: document.getElementById('new-uc-name').value.trim(),
+                archetype: document.getElementById('new-uc-archetype').value.trim(),
+                quote: document.getElementById('new-uc-quote').value.trim(),
+                background: document.getElementById('new-uc-background').value.trim(),
+                reality: document.getElementById('new-uc-reality').value.trim(),
+                persona: document.getElementById('new-uc-persona').value.trim(),
+                tension: document.getElementById('new-uc-tension').value.trim(),
+                focus: document.getElementById('new-uc-focus').value.trim(),
+                challenges: challenges,
+                values: values,
+                closing: document.getElementById('new-uc-closing').value.trim(),
+                ascii_logo: document.getElementById('new-uc-ascii-logo').value,
+                loading_message: document.getElementById('new-uc-loading-message').value.trim(),
+                sort_order: parseInt(document.getElementById('new-uc-sort-order').value) || 1,
+                active: true
+            };
+
+            if (!useCaseData.name || !useCaseData.archetype) {
+                showAdminStatus(statusEl, 'ERROR: Name and Archetype are required', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/use-cases`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(useCaseData)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showAdminStatus(statusEl, 'ERROR: ' + (data.error || 'Create failed'), 'error');
+                    return;
+                }
+
+                showAdminStatus(statusEl, 'USE CASE CREATED SUCCESSFULLY', 'success');
+                hideAddUseCaseForm();
+                await loadUseCases();
+                await renderAdminUseCases();
+            } catch (err) {
+                showAdminStatus(statusEl, 'ERROR: Connection failed', 'error');
+            }
+        }
+
+        async function editUseCase(useCaseId) {
+            const allUseCases = await loadAllUseCasesForAdmin();
+            const uc = allUseCases.find(u => u.use_case_id === useCaseId);
+            if (!uc) return;
+
+            const formContainer = document.getElementById(`edit-form-${useCaseId}`);
+            formContainer.innerHTML = `
+                <div class="admin-form-group">
+                    <label>Name:</label>
+                    <input type="text" id="edit-uc-name-${useCaseId}" value="${uc.name || ''}">
+                </div>
+                <div class="admin-form-group">
+                    <label>Archetype:</label>
+                    <input type="text" id="edit-uc-archetype-${useCaseId}" value="${uc.archetype || ''}">
+                </div>
+                <div class="admin-form-group">
+                    <label>Quote:</label>
+                    <input type="text" id="edit-uc-quote-${useCaseId}" value="${(uc.quote || '').replace(/"/g, '&quot;')}">
+                </div>
+                <div class="admin-form-group">
+                    <label>Background:</label>
+                    <textarea id="edit-uc-background-${useCaseId}">${uc.background || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Business Reality:</label>
+                    <textarea id="edit-uc-reality-${useCaseId}">${uc.reality || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>User Persona:</label>
+                    <textarea id="edit-uc-persona-${useCaseId}">${uc.persona || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Stakeholder Tension:</label>
+                    <textarea id="edit-uc-tension-${useCaseId}">${uc.tension || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Evaluation Focus:</label>
+                    <input type="text" id="edit-uc-focus-${useCaseId}" value="${uc.focus || ''}">
+                </div>
+                <div class="admin-form-group">
+                    <label>Challenges (one per line):</label>
+                    <textarea id="edit-uc-challenges-${useCaseId}">${(uc.challenges || []).join('\n')}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Values (one per line):</label>
+                    <textarea id="edit-uc-values-${useCaseId}">${(uc.values || []).join('\n')}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Closing Statement:</label>
+                    <textarea id="edit-uc-closing-${useCaseId}">${uc.closing || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>ASCII Logo (raw ASCII art, no &lt;pre&gt; tags):</label>
+                    <textarea id="edit-uc-ascii-logo-${useCaseId}" rows="12" style="font-family: monospace; font-size: 11px; white-space: pre;">${uc.ascii_logo || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Loading Message (shown when selecting use case):</label>
+                    <input type="text" id="edit-uc-loading-message-${useCaseId}" value="${(uc.loading_message || '').replace(/"/g, '&quot;')}">
+                </div>
+                <div class="admin-form-group">
+                    <label>Sort Order:</label>
+                    <input type="number" id="edit-uc-sort-order-${useCaseId}" value="${uc.sort_order || 1}" min="1">
+                </div>
+                <div class="admin-form-group">
+                    <label>
+                        <input type="checkbox" id="edit-uc-active-${useCaseId}" ${uc.active !== false ? 'checked' : ''}>
+                        Active (visible to teams)
+                    </label>
+                </div>
+                <button class="btn btn-admin" onclick="saveUseCase(${useCaseId})">SAVE CHANGES</button>
+                <button class="btn" onclick="cancelEditUseCase(${useCaseId})">CANCEL</button>
+                <div id="edit-uc-status-${useCaseId}" class="admin-status hidden"></div>
+            `;
+
+            formContainer.classList.remove('hidden');
+            document.getElementById(`admin-uc-${useCaseId}`).classList.add('editing');
+        }
+
+        function cancelEditUseCase(useCaseId) {
+            document.getElementById(`edit-form-${useCaseId}`).classList.add('hidden');
+            document.getElementById(`edit-form-${useCaseId}`).innerHTML = '';
+            document.getElementById(`admin-uc-${useCaseId}`).classList.remove('editing');
+        }
+
+        async function saveUseCase(useCaseId) {
+            const statusEl = document.getElementById(`edit-uc-status-${useCaseId}`);
+            const challenges = document.getElementById(`edit-uc-challenges-${useCaseId}`).value.split('\n').filter(c => c.trim());
+            const values = document.getElementById(`edit-uc-values-${useCaseId}`).value.split('\n').filter(v => v.trim());
+
+            const useCaseData = {
+                name: document.getElementById(`edit-uc-name-${useCaseId}`).value.trim(),
+                archetype: document.getElementById(`edit-uc-archetype-${useCaseId}`).value.trim(),
+                quote: document.getElementById(`edit-uc-quote-${useCaseId}`).value.trim(),
+                background: document.getElementById(`edit-uc-background-${useCaseId}`).value.trim(),
+                reality: document.getElementById(`edit-uc-reality-${useCaseId}`).value.trim(),
+                persona: document.getElementById(`edit-uc-persona-${useCaseId}`).value.trim(),
+                tension: document.getElementById(`edit-uc-tension-${useCaseId}`).value.trim(),
+                focus: document.getElementById(`edit-uc-focus-${useCaseId}`).value.trim(),
+                challenges: challenges,
+                values: values,
+                closing: document.getElementById(`edit-uc-closing-${useCaseId}`).value.trim(),
+                ascii_logo: document.getElementById(`edit-uc-ascii-logo-${useCaseId}`).value,
+                loading_message: document.getElementById(`edit-uc-loading-message-${useCaseId}`).value.trim(),
+                sort_order: parseInt(document.getElementById(`edit-uc-sort-order-${useCaseId}`).value) || 1,
+                active: document.getElementById(`edit-uc-active-${useCaseId}`).checked
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/use-cases/${useCaseId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(useCaseData)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showAdminStatus(statusEl, 'ERROR: ' + (data.error || 'Update failed'), 'error');
+                    return;
+                }
+
+                showAdminStatus(statusEl, 'USE CASE UPDATED SUCCESSFULLY', 'success');
+                setTimeout(async () => {
+                    cancelEditUseCase(useCaseId);
+                    await loadUseCases();
+                    await renderAdminUseCases();
+                }, 1000);
+            } catch (err) {
+                showAdminStatus(statusEl, 'ERROR: Connection failed', 'error');
+            }
+        }
+
+        async function deleteUseCase(useCaseId, useCaseName) {
+            if (!confirm(`Are you sure you want to delete "${useCaseName}"? This cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/use-cases/${useCaseId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    alert('ERROR: ' + (data.error || 'Delete failed'));
+                    return;
+                }
+
+                await loadUseCases();
+                await renderAdminUseCases();
+            } catch (err) {
+                alert('ERROR: Connection failed');
+            }
+        }
+
+        function showAdminStatus(el, message, type) {
+            el.textContent = message;
+            el.className = 'admin-status ' + type;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 5000);
+        }
+
+        // ========== JUDGING CRITERIA ADMIN FUNCTIONS ==========
+
+        async function showEditJudgingCriteriaForm() {
+            const formContainer = document.getElementById('edit-judging-form');
+            
+            // Fetch fresh data
+            try {
+                const res = await fetch(`${API_URL}/judging-criteria`);
+                judgingCriteriaData = await res.json();
+            } catch (err) {
+                formContainer.innerHTML = '<p style="color: #ff6666;">Error loading judging criteria.</p>';
+                formContainer.classList.remove('hidden');
+                return;
+            }
+
+            const jc = judgingCriteriaData;
+            
+            formContainer.innerHTML = `
+                <h3 style="color: #ffcc66; margin-bottom: 15px;">EDIT JUDGING CRITERIA</h3>
+                
+                <div class="admin-form-group">
+                    <label>Introduction Text:</label>
+                    <textarea id="jc-intro" rows="2">${jc.intro || ''}</textarea>
+                </div>
+
+                <div class="admin-form-group">
+                    <label>Closing Statement:</label>
+                    <textarea id="jc-closing" rows="2">${jc.closing || ''}</textarea>
+                </div>
+
+                <h4 style="color: #aa8800; margin: 20px 0 10px 0;">REQUIRED TOOL</h4>
+                <div class="admin-form-group">
+                    <label>Tool Name:</label>
+                    <input type="text" id="jc-tool-name" value="${jc.required_tool?.name || ''}">
+                </div>
+                <div class="admin-form-group">
+                    <label>Tool Description:</label>
+                    <textarea id="jc-tool-desc" rows="2">${jc.required_tool?.description || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Tool Features (one per line):</label>
+                    <textarea id="jc-tool-features" rows="4">${(jc.required_tool?.features || []).join('\n')}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Tool Note:</label>
+                    <textarea id="jc-tool-note" rows="2">${jc.required_tool?.note || ''}</textarea>
+                </div>
+
+                <h4 style="color: #aa8800; margin: 20px 0 10px 0;">EXPECTED AWS SERVICES</h4>
+                <div class="admin-form-group">
+                    <label>Services Description:</label>
+                    <textarea id="jc-services-desc" rows="2">${jc.expected_services?.description || ''}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Services List (one per line):</label>
+                    <textarea id="jc-services-list" rows="8">${(jc.expected_services?.services || []).join('\n')}</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Services Note:</label>
+                    <textarea id="jc-services-note" rows="2">${jc.expected_services?.note || ''}</textarea>
+                </div>
+
+                <p style="color: #aa8800; margin: 15px 0; font-size: 14px;">Note: Category editing (Presentation, Innovation, Functionality, AWS Well-Architected) is available via direct database access for complex changes.</p>
+
+                <button class="btn btn-admin" onclick="saveJudgingCriteria()">SAVE JUDGING CRITERIA</button>
+                <button class="btn" onclick="hideEditJudgingCriteriaForm()">CANCEL</button>
+                <div id="jc-status" class="admin-status hidden"></div>
+            `;
+
+            formContainer.classList.remove('hidden');
+        }
+
+        function hideEditJudgingCriteriaForm() {
+            document.getElementById('edit-judging-form').classList.add('hidden');
+            document.getElementById('edit-judging-form').innerHTML = '';
+        }
+
+        async function saveJudgingCriteria() {
+            const statusEl = document.getElementById('jc-status');
+
+            const updatedData = {
+                intro: document.getElementById('jc-intro').value.trim(),
+                closing: document.getElementById('jc-closing').value.trim(),
+                required_tool: {
+                    name: document.getElementById('jc-tool-name').value.trim(),
+                    description: document.getElementById('jc-tool-desc').value.trim(),
+                    features: document.getElementById('jc-tool-features').value.split('\n').filter(f => f.trim()),
+                    note: document.getElementById('jc-tool-note').value.trim()
+                },
+                expected_services: {
+                    description: document.getElementById('jc-services-desc').value.trim(),
+                    services: document.getElementById('jc-services-list').value.split('\n').filter(s => s.trim()),
+                    note: document.getElementById('jc-services-note').value.trim()
+                }
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/judging-criteria`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showAdminStatus(statusEl, 'ERROR: ' + (data.error || 'Update failed'), 'error');
+                    return;
+                }
+
+                // Update local cache
+                judgingCriteriaData = data;
+                
+                showAdminStatus(statusEl, 'JUDGING CRITERIA UPDATED SUCCESSFULLY', 'success');
+                setTimeout(() => {
+                    hideEditJudgingCriteriaForm();
+                }, 1500);
+            } catch (err) {
+                showAdminStatus(statusEl, 'ERROR: Connection failed', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

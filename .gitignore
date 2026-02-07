@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+._*
+
+# Lambda deployment packages (generated)
+lambda-api/*.zip
+*.zip
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files (if any)
+.env
+.env.local

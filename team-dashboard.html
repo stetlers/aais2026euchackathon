@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAIS 2026 EUC Hackathon - Team Dashboard</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('pre-war-new-vegas-is-absolutely-stunning-i-am-in-sheer-awe-v0-gqg29pm5z0kf1.jpg.webp') center center;
+            background-size: cover;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.85) 100%);
+            z-index: -1;
+        }
+
+        .monitor {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9), 0 0 100px rgba(0,255,0,0.1), inset 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+            border: 3px solid #333;
+        }
+
+        .screen {
+            background: #001200;
+            border-radius: 20px;
+            padding: 30px;
+            width: 800px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: inset 0 0 100px rgba(0,50,0,0.3), 0 0 20px rgba(0,255,0,0.1);
+        }
+
+        .terminal {
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            color: #33ff33;
+            text-shadow: 0 0 2px #33ff33;
+            line-height: 1.4;
+        }
+
+        h1 { font-size: 28px; margin-bottom: 10px; text-align: center; color: #ccffcc; text-shadow: 0 0 3px #66ff66; }
+        h2 { font-size: 22px; margin: 20px 0 15px 0; color: #aaffaa; border-bottom: 1px solid #336633; padding-bottom: 10px; }
+        h3 { font-size: 18px; margin: 15px 0 10px 0; color: #88dd88; }
+
+        .welcome { text-align: center; margin-bottom: 20px; color: #aaffaa; }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #aaffaa; }
+
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            background: rgba(0,50,0,0.3);
+            border: 1px solid #336633;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            padding: 10px;
+            outline: none;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #66ff66;
+            box-shadow: 0 0 5px rgba(0,255,0,0.3);
+        }
+
+        textarea { min-height: 100px; resize: vertical; }
+
+        select { cursor: pointer; }
+        select option { background: #001200; color: #33ff33; }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .btn:hover { background: rgba(0,255,0,0.2); color: #ccffcc; }
+        .btn-danger { border-color: #ff6666; color: #ff6666; }
+        .btn-danger:hover { background: rgba(255,0,0,0.2); }
+
+        .member-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .member-row input { flex: 1; }
+        .member-row .btn { margin: 0; padding: 8px 12px; }
+
+        .service-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .service-tag {
+            background: rgba(0,100,0,0.3);
+            border: 1px solid #44aa44;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .service-tag .remove { cursor: pointer; color: #ff6666; }
+
+        .status { margin: 15px 0; padding: 10px; border: 1px solid #336633; }
+        .status.success { border-color: #44aa44; color: #66ff66; }
+        .status.error { border-color: #aa4444; color: #ff6666; }
+
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #336633;
+        }
+
+        .nav-links a {
+            color: #66aa66;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover { color: #aaffaa; }
+
+        .use-case-info {
+            background: rgba(0,50,0,0.3);
+            border: 1px solid #336633;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .power-led {
+            position: absolute;
+            bottom: 15px;
+            right: 50px;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff00;
+            animation: led-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes led-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .loading { text-align: center; padding: 40px; color: #66aa66; }
+
+        /* Popup Styles */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+        }
+        .popup-overlay.visible { display: block; }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 700px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: #001a00;
+            border: 2px solid #44aa44;
+            box-shadow: 0 0 30px rgba(0,255,0,0.3), 0 0 60px rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 25px;
+            font-family: 'VT323', monospace;
+        }
+        .popup.visible { display: block; }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #336633;
+        }
+        .popup-title { font-size: 22px; color: #88ff88; }
+        .popup-close {
+            background: transparent;
+            border: 1px solid #ff6666;
+            color: #ff6666;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+        .popup-close:hover { background: rgba(255,0,0,0.2); }
+
+        .popup-content { color: #33ff33; font-size: 17px; line-height: 1.5; }
+        .popup-content h3 { color: #aaffaa; font-size: 18px; margin: 15px 0 8px 0; border-bottom: 1px solid #336633; padding-bottom: 5px; }
+        .popup-content p { margin-bottom: 10px; }
+        .popup-content ul { margin: 8px 0 12px 20px; }
+        .popup-content li { margin-bottom: 5px; }
+        .popup-content .quote { color: #88dd88; font-style: italic; padding: 10px; border-left: 3px solid #44aa44; margin: 10px 0; background: rgba(0,100,0,0.1); }
+        .popup-content .archetype { color: #ffcc66; font-size: 16px; }
+        .popup-content .focus-title { color: #ffcc66; font-size: 19px; }
+
+        .clickable-link {
+            color: #66ff66;
+            cursor: pointer;
+            border-bottom: 1px dashed #66aa66;
+        }
+        .clickable-link:hover { color: #aaffaa; }
+
+        .quick-links {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,50,0,0.3);
+            border: 1px solid #336633;
+        }
+    </style>
+</head>
+<body>
+    <div class="monitor">
+        <div class="screen">
+            <div class="terminal">
+                <h1>>>> TEAM DASHBOARD <<<</h1>
+                <div id="welcome" class="welcome"></div>
+
+                <div id="loading" class="loading">LOADING TEAM DATA...</div>
+
+                <div id="dashboard" style="display: none;">
+                    <!-- Quick Links -->
+                    <div class="quick-links">
+                        <span class="clickable-link" onclick="showJudgingCriteriaPopup()">📋 View Judging Criteria</span>
+                    </div>
+
+                    <!-- Use Case Selection -->
+                    <h2>USE CASE SELECTION</h2>
+                    <div class="form-group">
+                        <label>SELECT YOUR USE CASE:</label>
+                        <select id="use-case">
+                            <option value="0">-- Loading Use Cases... --</option>
+                        </select>
+                    </div>
+                    <div id="use-case-info" class="use-case-info" style="display: none;"></div>
+
+                    <!-- Team Members -->
+                    <h2>TEAM MEMBERS</h2>
+                    <div id="members-list"></div>
+                    <button class="btn" onclick="addMember()">+ ADD MEMBER</button>
+
+                    <!-- Solution Description -->
+                    <h2>SOLUTION DESCRIPTION</h2>
+                    <div class="form-group">
+                        <label>DESCRIBE YOUR SOLUTION:</label>
+                        <textarea id="solution" placeholder="Describe your solution approach, architecture, and how it addresses the use case challenges..."></textarea>
+                    </div>
+
+                    <!-- AWS Services Used -->
+                    <h2>AWS SERVICES USED</h2>
+                    <div class="form-group">
+                        <label>ADD SERVICES (press Enter to add):</label>
+                        <input type="text" id="service-input" placeholder="e.g., Amazon Bedrock, AWS Lambda...">
+                    </div>
+                    <div id="services-list" class="service-tags"></div>
+
+                    <!-- Save Button -->
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="saveTeamData()">>>> SAVE CHANGES <<<</button>
+                    </div>
+
+                    <div id="status" class="status" style="display: none;"></div>
+
+                    <!-- Navigation -->
+                    <div class="nav-links">
+                        <a href="terminal.html">← View Use Cases</a>
+                        <a href="#" onclick="logout()">LOGOUT →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="power-led"></div>
+    </div>
+
+    <!-- Popup Overlay -->
+    <div class="popup-overlay" id="popup-overlay" onclick="closePopup()"></div>
+    
+    <!-- Use Case Popup -->
+    <div class="popup" id="use-case-popup">
+        <div class="popup-header">
+            <div class="popup-title" id="uc-popup-title"></div>
+            <button class="popup-close" onclick="closePopup()">✕ CLOSE</button>
+        </div>
+        <div class="popup-content" id="uc-popup-content"></div>
+    </div>
+
+    <!-- Judging Criteria Popup -->
+    <div class="popup" id="judging-popup">
+        <div class="popup-header">
+            <div class="popup-title">JUDGING CRITERIA</div>
+            <button class="popup-close" onclick="closePopup()">✕ CLOSE</button>
+        </div>
+        <div class="popup-content" id="judging-popup-content">Loading...</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://fc4xp2lydj.execute-api.us-east-1.amazonaws.com/prod';
+        let teamData = {};
+        let members = [];
+        let services = [];
+        let useCasesData = []; // Will be populated from API
+        let USE_CASE_INFO = {}; // Will be populated from API
+        let judgingCriteriaData = null; // Will be populated from API
+
+        // Fetch use cases from API
+        async function loadUseCases() {
+            try {
+                const res = await fetch(`${API_URL}/use-cases`);
+                if (!res.ok) throw new Error('Failed to fetch use cases');
+                const data = await res.json();
+                
+                useCasesData = data.use_cases
+                    .filter(uc => uc.active !== false)
+                    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+                
+                // Build USE_CASE_INFO from API data (with full details for popup)
+                useCasesData.forEach((uc, idx) => {
+                    const num = idx + 1;
+                    USE_CASE_INFO[num] = {
+                        id: uc.use_case_id,
+                        name: uc.name,
+                        focus: uc.focus,
+                        archetype: uc.archetype,
+                        quote: uc.quote,
+                        background: uc.background,
+                        reality: uc.reality,
+                        persona: uc.persona,
+                        tension: uc.tension,
+                        challenges: uc.challenges || [],
+                        values: uc.values || []
+                    };
+                });
+                
+                // Populate dropdown
+                const select = document.getElementById('use-case');
+                select.innerHTML = '<option value="0">-- Select a Use Case --</option>';
+                useCasesData.forEach((uc, idx) => {
+                    const num = idx + 1;
+                    const option = document.createElement('option');
+                    option.value = num;
+                    option.textContent = `${num}. ${uc.name} [${uc.archetype}]`;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Error loading use cases:', err);
+                document.getElementById('use-case').innerHTML = '<option value="0">-- Error Loading Use Cases --</option>';
+            }
+        }
+
+        // Check auth on load
+        window.onload = async function() {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            
+            if (!token || userType !== 'team') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('welcome').textContent = 
+                `Welcome, ${localStorage.getItem('teamName')} (${localStorage.getItem('teamId')})`;
+
+            // Load use cases first, then team data
+            await loadUseCases();
+            await loadTeamData();
+        };
+
+        async function loadTeamData() {
+            try {
+                const res = await fetch(`${API_URL}/team/me`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
+
+                teamData = await res.json();
+                
+                // Populate form
+                document.getElementById('use-case').value = teamData.use_case || 0;
+                updateUseCaseInfo();
+                
+                document.getElementById('solution').value = teamData.solution_description || '';
+                
+                members = teamData.members || [];
+                renderMembers();
+                
+                services = teamData.services_used || [];
+                renderServices();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                showStatus('ERROR: Failed to load team data', 'error');
+            }
+        }
+
+        function updateUseCaseInfo() {
+            const useCase = parseInt(document.getElementById('use-case').value);
+            const infoEl = document.getElementById('use-case-info');
+            
+            if (useCase > 0 && USE_CASE_INFO[useCase]) {
+                infoEl.innerHTML = `<strong><span class="clickable-link" onclick="showUseCasePopup(${useCase})">${USE_CASE_INFO[useCase].name}</span></strong><br>
+                    Evaluation Focus: ${USE_CASE_INFO[useCase].focus}<br>
+                    <span class="clickable-link" onclick="showUseCasePopup(${useCase})" style="font-size: 16px;">Click to view full use case details →</span>`;
+                infoEl.style.display = 'block';
+            } else {
+                infoEl.style.display = 'none';
+            }
+        }
+
+        document.getElementById('use-case').addEventListener('change', updateUseCaseInfo);
+
+        // Members management
+        function renderMembers() {
+            const container = document.getElementById('members-list');
+            container.innerHTML = '';
+            
+            members.forEach((member, index) => {
+                const row = document.createElement('div');
+                row.className = 'member-row';
+                row.innerHTML = `
+                    <input type="text" value="${member.name || ''}" placeholder="Name" onchange="updateMember(${index}, 'name', this.value)">
+                    <input type="text" value="${member.role || ''}" placeholder="Role" onchange="updateMember(${index}, 'role', this.value)">
+                    <input type="text" value="${member.email || ''}" placeholder="Email" onchange="updateMember(${index}, 'email', this.value)">
+                    <button class="btn btn-danger" onclick="removeMember(${index})">X</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function addMember() {
+            members.push({ name: '', role: '', email: '' });
+            renderMembers();
+        }
+
+        function updateMember(index, field, value) {
+            members[index][field] = value;
+        }
+
+        function removeMember(index) {
+            members.splice(index, 1);
+            renderMembers();
+        }
+
+        // Services management
+        function renderServices() {
+            const container = document.getElementById('services-list');
+            container.innerHTML = '';
+            
+            services.forEach((service, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'service-tag';
+                tag.innerHTML = `${service} <span class="remove" onclick="removeService(${index})">✕</span>`;
+                container.appendChild(tag);
+            });
+        }
+
+        function removeService(index) {
+            services.splice(index, 1);
+            renderServices();
+        }
+
+        document.getElementById('service-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const value = e.target.value.trim();
+                if (value && !services.includes(value)) {
+                    services.push(value);
+                    renderServices();
+                }
+                e.target.value = '';
+            }
+        });
+
+        // Save data
+        async function saveTeamData() {
+            const useCase = parseInt(document.getElementById('use-case').value);
+            const solution = document.getElementById('solution').value.trim();
+            
+            // Filter out empty members
+            const validMembers = members.filter(m => m.name && m.name.trim());
+
+            try {
+                const res = await fetch(`${API_URL}/team/me`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        use_case: useCase,
+                        solution_description: solution,
+                        members: validMembers,
+                        services_used: services
+                    })
+                });
+
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showStatus('ERROR: ' + (data.error || 'Save failed'), 'error');
+                    return;
+                }
+
+                showStatus('CHANGES SAVED SUCCESSFULLY', 'success');
+                
+                // Update local data
+                teamData = data;
+                members = data.members || [];
+                services = data.services_used || [];
+            } catch (err) {
+                showStatus('ERROR: Connection failed', 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + type;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 5000);
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Popup functions
+        function closePopup() {
+            document.getElementById('popup-overlay').classList.remove('visible');
+            document.getElementById('use-case-popup').classList.remove('visible');
+            document.getElementById('judging-popup').classList.remove('visible');
+        }
+
+        function showUseCasePopup(useCaseNum) {
+            const details = USE_CASE_INFO[useCaseNum];
+            if (!details) return;
+
+            document.getElementById('uc-popup-title').innerHTML = `${details.name} <span class="archetype">[${details.archetype}]</span>`;
+            document.getElementById('uc-popup-content').innerHTML = `
+                <div class="quote">"${details.quote}"</div>
+                <h3>BACKGROUND</h3>
+                <p>${details.background}</p>
+                <h3>BUSINESS REALITY</h3>
+                <p>${details.reality}</p>
+                <h3>USER PERSONA</h3>
+                <p>${details.persona}</p>
+                <h3>STAKEHOLDER TENSION</h3>
+                <p>${details.tension}</p>
+                <h3 class="focus-title">EVALUATION FOCUS: ${details.focus}</h3>
+                <p>Your challenge is to demonstrate how ${details.name} can:</p>
+                <ul>${details.challenges.map(c => '<li>' + c + '</li>').join('')}</ul>
+                <p>The panel values:</p>
+                <ul>${details.values.map(v => '<li>' + v + '</li>').join('')}</ul>
+            `;
+
+            document.getElementById('popup-overlay').classList.add('visible');
+            document.getElementById('use-case-popup').classList.add('visible');
+        }
+
+        async function showJudgingCriteriaPopup() {
+            document.getElementById('popup-overlay').classList.add('visible');
+            document.getElementById('judging-popup').classList.add('visible');
+
+            if (!judgingCriteriaData) {
+                try {
+                    const res = await fetch(`${API_URL}/judging-criteria`);
+                    judgingCriteriaData = await res.json();
+                } catch (err) {
+                    document.getElementById('judging-popup-content').innerHTML = '<p style="color: #ff6666;">Error loading judging criteria.</p>';
+                    return;
+                }
+            }
+
+            const jc = judgingCriteriaData;
+            let html = `<div class="quote">${jc.intro}</div>`;
+
+            // Categories
+            if (jc.categories) {
+                jc.categories.forEach((cat, idx) => {
+                    html += `<h3>CATEGORY ${idx + 1}: ${cat.name.toUpperCase()} (${cat.points} Points)</h3>`;
+                    html += `<p>${cat.description}</p>`;
+                    if (cat.items && cat.items.length > 0) {
+                        html += '<ul>' + cat.items.map(item => '<li>' + item + '</li>').join('') + '</ul>';
+                    }
+                });
+            }
+
+            // Required Tool
+            if (jc.required_tool) {
+                html += `<h3>REQUIRED TOOL: ${jc.required_tool.name.toUpperCase()}</h3>`;
+                html += `<p>${jc.required_tool.description}</p>`;
+                if (jc.required_tool.features && jc.required_tool.features.length > 0) {
+                    html += '<ul>' + jc.required_tool.features.map(f => '<li>' + f + '</li>').join('') + '</ul>';
+                }
+                if (jc.required_tool.note) {
+                    html += `<p>${jc.required_tool.note}</p>`;
+                }
+            }
+
+            // Expected Services
+            if (jc.expected_services) {
+                html += `<h3>EXPECTED AWS SERVICES</h3>`;
+                html += `<p>${jc.expected_services.description}</p>`;
+                if (jc.expected_services.services && jc.expected_services.services.length > 0) {
+                    html += '<ul>' + jc.expected_services.services.map(s => '<li>' + s + '</li>').join('') + '</ul>';
+                }
+                if (jc.expected_services.note) {
+                    html += `<p>${jc.expected_services.note}</p>`;
+                }
+            }
+
+            // Closing
+            if (jc.closing) {
+                html += `<p style="margin-top: 20px; font-style: italic; color: #88dd88; border-top: 1px solid #336633; padding-top: 15px;">${jc.closing}</p>`;
+            }
+
+            document.getElementById('judging-popup-content').innerHTML = html;
+        }
+
+        // Close popup on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closePopup();
+        });
+    </script>
+</body>
+</html>

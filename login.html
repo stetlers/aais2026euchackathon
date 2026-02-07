@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAIS 2026 EUC Hackathon - Login</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('pre-war-new-vegas-is-absolutely-stunning-i-am-in-sheer-awe-v0-gqg29pm5z0kf1.jpg.webp') center center;
+            background-size: cover;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.6) 50%,
+                rgba(0, 0, 0, 0.85) 100%
+            );
+            z-index: -1;
+        }
+
+        .monitor {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 
+                0 0 50px rgba(0, 0, 0, 0.9),
+                0 0 100px rgba(0, 255, 0, 0.1),
+                inset 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            border: 3px solid #333;
+        }
+
+        .screen {
+            background: #001200;
+            border-radius: 20px;
+            padding: 30px;
+            width: 500px;
+            max-width: 90vw;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 100px rgba(0, 50, 0, 0.3),
+                0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.2) 80%,
+                rgba(0, 0, 0, 0.4) 100%
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        .terminal {
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            color: #33ff33;
+            text-shadow: 0 0 2px #33ff33;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ccffcc;
+            text-shadow: 0 0 3px #66ff66;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #aaffaa;
+            border-bottom: 1px solid #336633;
+            padding-bottom: 10px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: 1px solid #33ff33;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 255, 0, 0.2);
+            color: #ccffcc;
+            border-color: #66ff66;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaffaa;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid #336633;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            padding: 10px;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #66ff66;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            background: transparent;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 0, 0.2);
+            color: #ccffcc;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error {
+            color: #ff6666;
+            text-shadow: 0 0 2px #ff3333;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .success {
+            color: #66ff66;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #66aa66;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: #aaffaa;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            color: #666;
+        }
+
+        .power-led {
+            position: absolute;
+            bottom: 15px;
+            right: 50px;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff00;
+            animation: led-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes led-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="monitor">
+        <div class="screen">
+            <div class="terminal">
+                <h1>>>> TERMINAL ACCESS <<<</h1>
+
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showTab('team')">TEAM LOGIN</button>
+                    <button class="tab-btn" onclick="showTab('panelist')">PANELIST LOGIN</button>
+                </div>
+
+                <!-- Team Login/Register -->
+                <div id="team-tab" class="tab-content active">
+                    <div id="team-login-form">
+                        <h2>TEAM AUTHENTICATION</h2>
+                        <div class="form-group">
+                            <label>TEAM ID:</label>
+                            <input type="text" id="team-id" placeholder="Enter team ID">
+                        </div>
+                        <div class="form-group">
+                            <label>PASSWORD:</label>
+                            <input type="password" id="team-password" placeholder="Enter password">
+                        </div>
+                        <button class="btn" onclick="teamLogin()">>>> LOGIN <<<</button>
+                        <div class="divider">─ OR ─</div>
+                        <button class="btn" onclick="showRegister()">REGISTER NEW TEAM</button>
+                        <div id="team-error" class="error"></div>
+                    </div>
+
+                    <div id="team-register-form" style="display: none;">
+                        <h2>REGISTER NEW TEAM</h2>
+                        <div class="form-group">
+                            <label>TEAM ID (no spaces):</label>
+                            <input type="text" id="reg-team-id" placeholder="e.g., vault-dwellers">
+                        </div>
+                        <div class="form-group">
+                            <label>TEAM NAME:</label>
+                            <input type="text" id="reg-team-name" placeholder="e.g., The Vault Dwellers">
+                        </div>
+                        <div class="form-group">
+                            <label>PASSWORD (min 6 chars):</label>
+                            <input type="password" id="reg-password" placeholder="Choose a password">
+                        </div>
+                        <button class="btn" onclick="teamRegister()">>>> REGISTER <<<</button>
+                        <button class="btn" onclick="showLogin()" style="margin-top: 5px;">BACK TO LOGIN</button>
+                        <div id="reg-error" class="error"></div>
+                    </div>
+                </div>
+
+                <!-- Panelist Login -->
+                <div id="panelist-tab" class="tab-content">
+                    <h2>PANELIST AUTHENTICATION</h2>
+                    <div class="form-group">
+                        <label>PANELIST ID:</label>
+                        <input type="text" id="panelist-id" placeholder="e.g., stephen-stetler">
+                    </div>
+                    <div class="form-group">
+                        <label>PASSWORD:</label>
+                        <input type="password" id="panelist-password" placeholder="Enter password">
+                    </div>
+                    <button class="btn" onclick="panelistLogin()">>>> LOGIN <<<</button>
+                    <div id="panelist-error" class="error"></div>
+                </div>
+
+                <a href="terminal.html" class="back-link">← Back to Use Cases</a>
+            </div>
+        </div>
+        <div class="power-led"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://fc4xp2lydj.execute-api.us-east-1.amazonaws.com/prod';
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+
+        function showRegister() {
+            document.getElementById('team-login-form').style.display = 'none';
+            document.getElementById('team-register-form').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('team-login-form').style.display = 'block';
+            document.getElementById('team-register-form').style.display = 'none';
+        }
+
+        async function teamLogin() {
+            const teamId = document.getElementById('team-id').value.trim();
+            const password = document.getElementById('team-password').value;
+            const errorEl = document.getElementById('team-error');
+            
+            errorEl.textContent = '';
+            
+            if (!teamId || !password) {
+                errorEl.textContent = 'ERROR: All fields required';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/team-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ team_id: teamId, password })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    errorEl.textContent = 'ERROR: ' + (data.error || 'Login failed');
+                    return;
+                }
+                
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userType', 'team');
+                localStorage.setItem('teamId', data.team_id);
+                localStorage.setItem('teamName', data.team_name);
+                
+                window.location.href = 'team-dashboard.html';
+            } catch (err) {
+                errorEl.textContent = 'ERROR: Connection failed';
+            }
+        }
+
+        async function teamRegister() {
+            const teamId = document.getElementById('reg-team-id').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const teamName = document.getElementById('reg-team-name').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const errorEl = document.getElementById('reg-error');
+            
+            errorEl.textContent = '';
+            
+            if (!teamId || !teamName || !password) {
+                errorEl.textContent = 'ERROR: All fields required';
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorEl.textContent = 'ERROR: Password must be at least 6 characters';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/team-register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ team_id: teamId, team_name: teamName, password })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    errorEl.textContent = 'ERROR: ' + (data.error || 'Registration failed');
+                    return;
+                }
+                
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userType', 'team');
+                localStorage.setItem('teamId', data.team_id);
+                localStorage.setItem('teamName', data.team_name);
+                
+                window.location.href = 'team-dashboard.html';
+            } catch (err) {
+                errorEl.textContent = 'ERROR: Connection failed';
+            }
+        }
+
+        async function panelistLogin() {
+            const panelistId = document.getElementById('panelist-id').value.trim().toLowerCase().replace(/\s+/g, '-');
+            const password = document.getElementById('panelist-password').value;
+            const errorEl = document.getElementById('panelist-error');
+            
+            errorEl.textContent = '';
+            
+            if (!panelistId || !password) {
+                errorEl.textContent = 'ERROR: All fields required';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/panelist-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ panelist_id: panelistId, password })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    errorEl.textContent = 'ERROR: ' + (data.error || 'Login failed');
+                    return;
+                }
+                
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userType', 'panelist');
+                localStorage.setItem('panelistId', data.panelist_id);
+                localStorage.setItem('panelistName', data.name);
+                localStorage.setItem('isAdmin', data.is_admin ? 'true' : 'false');
+                
+                window.location.href = 'panelist-dashboard.html';
+            } catch (err) {
+                errorEl.textContent = 'ERROR: Connection failed';
+            }
+        }
+
+        // Allow Enter key to submit
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const activeTab = document.querySelector('.tab-content.active');
+                    if (activeTab.id === 'team-tab') {
+                        if (document.getElementById('team-register-form').style.display !== 'none') {
+                            teamRegister();
+                        } else {
+                            teamLogin();
+                        }
+                    } else {
+                        panelistLogin();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

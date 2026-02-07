@@ -1,0 +1,454 @@
+{
+    "Items": [
+        {
+            "tension": {
+                "S": "Security & Compliance Officers: Treat every endpoint as compromised by default. Want zero local installs and tight session controls. Prefer systems that resemble air-gapped environments. Measure success by audit outcomes, not productivity. Defense Analysts & Program Managers: Need rapid turnaround on simulations and models. Increasingly operate across regions and facilities. Frustrated by travel delays and brittle access setups. Measure success by decision speed and accuracy. Government Customers: Demand both secrecy and responsiveness. Expect modern workflows without modern risk."
+            },
+            "reality": {
+                "S": "Analysts at General Atomics rely on specialized modeling and simulation tools to evaluate battlefield scenarios. These tools are too sensitive to install on analyst laptops, but too critical to restrict to a single physical location.\n\nToday, analysts must travel to approved facilities just to run simulations. This creates delays measured in days—sometimes weeks—while decisions are expected in hours. When remote access is granted, it often involves brittle setups that break under patching or network changes.\n\nSecurity teams insist that nothing be installed locally. Program managers insist analysts be productive anywhere. IT teams are caught in the middle, maintaining fragile environments that require constant babysitting.\n\nA recent internal audit revealed that different analyst groups are running different versions of the same application, leading to inconsistent results being briefed to leadership.\n\nGeneral Atomics doesn’t want innovation—they want control without stagnation, and right now, they have neither."
+            },
+            "use_case_id": {
+                "N": "3"
+            },
+            "challenges": {
+                "L": [
+                    {
+                        "S": "Prove that every action taken was authorized and recorded"
+                    },
+                    {
+                        "S": "Guarantee environment integrity before, during, and after development"
+                    },
+                    {
+                        "S": "Support rapid iteration without compromising auditability"
+                    }
+                ]
+            },
+            "values": {
+                "L": [
+                    {
+                        "S": "Immutable audit trails that survive scrutiny"
+                    },
+                    {
+                        "S": "Environment validation that doesn't slow delivery"
+                    },
+                    {
+                        "S": "Change management that proves intent, not just outcome"
+                    },
+                    {
+                        "S": "Assistive systems that guide compliance as a byproduct of work"
+                    }
+                ]
+            },
+            "ascii_logo": {
+                "S": "         ┌─────────────────────────┐\n         │      ╱╲    ⚛    ╱╲      │\n         │     ╱  ╲  ╱ ╲  ╱  ╲     │\n         │    ╱ ◉──╳─────╳──◉ ╲    │\n         │     ╲  ╱  ╲ ╱  ╲  ╱     │\n         │      ╲╱    ⚛    ╲╱      │\n         │   ═══════════════════   │\n         │   GENERAL  ATOMICS      │\n         │     INTERNATIONAL       │\n         └─────────────────────────┘"
+            },
+            "archetype": {
+                "S": "Assurance-Driven"
+            },
+            "name": {
+                "S": "General Atomics International"
+            },
+            "updated_at": {
+                "S": "2026-02-06T23:10:25Z"
+            },
+            "focus": {
+                "S": "Assurance, Repeatability, and Decision Confidence"
+            },
+            "active": {
+                "BOOL": true
+            },
+            "background": {
+                "S": "General Atomics International operates in a world defined by paranoia—and profit. As a top-tier defense contractor, it develops robotics, targeting systems, and autonomous platforms for military use across the globe.\n\nThe company’s culture is rigid, procedural, and deeply suspicious of change. Every system is assumed hostile until proven otherwise. Access is tightly controlled, audited, and monitored. Convenience is considered a liability.\n\nYet geopolitical realities are shifting. Intelligence analysis can no longer be confined to a single secure building."
+            },
+            "closing": {
+                "S": "General Atomics knows that trust is built one audit at a time. They can't afford to fail even one."
+            },
+            "persona": {
+                "S": "Dr. Sarah Okonkwo (Weapons Systems Architect) — Sarah arrives at a secure facility at 6 AM to run threat simulations requested overnight by command. The modeling software she needs isn’t available anywhere else—certainly not on her laptop.\n\nHalfway through her analysis, a senior officer asks for a revised scenario immediately. Sarah can’t work remotely. She can’t bring the tools with her. She’s stuck.\n\nWhen she finally delivers the updated results, leadership questions discrepancies compared to last week’s briefing. Turns out another analyst used a different version of the same application.\n\nSarah trusts the math. She doesn’t trust the systems delivering it.\n\nHer job is to provide clarity in chaos.\nBut inconsistent tools are adding noise where precision is required."
+            },
+            "sort_order": {
+                "N": "3"
+            },
+            "quote": {
+                "S": "A weapon is only secure if its operator can't steal it."
+            }
+        },
+        {
+            "tension": {
+                "S": "Engineering Leadership (Product & R&D): Wants unlimited compute, instantly. Refuses to wait for approvals or provisioning. Believes infrastructure should disappear entirely. Measures success by time-to-prototype. Corporate Security & Legal: Alarmed by engineers copying code to personal systems. Concerned about global contractors accessing crown-jewel IP. Wants centralized control and audibility. Measures success by zero IP incidents. Finance: Nervous about runaway compute and licensing costs. Wants predictability without slowing innovation."
+            },
+            "reality": {
+                "S": "RobCo engineers routinely push their hardware to the limit. Local workstations overheat, crash, or simply can’t keep up with simulation workloads. New hires wait weeks for approved machines, while contractors are forced to use underpowered laptops that slow development to a crawl.\n\nTo cope, teams have begun finding workarounds—copying sensitive code to personal systems, spinning up unauthorized compute resources, or bypassing internal controls entirely just to meet deadlines. Security teams are alarmed, but every attempt to lock things down is met with backlash from engineering leadership.\n\nMeanwhile, RobCo’s talent pool is increasingly global. Engineers work from different countries, time zones, and network conditions. Performance varies wildly depending on location, and no two developers seem to have the same environment. Bugs appear in production that “worked fine” on one machine but fail elsewhere.\n\nRobCo isn’t worried about whether their engineers can work—they’re worried about how long innovation can survive when the tools meant to enable it are actively getting in the way."
+            },
+            "use_case_id": {
+                "N": "2"
+            },
+            "challenges": {
+                "L": [
+                    {
+                        "S": "Deliver instant, high-performance environments regardless of location"
+                    },
+                    {
+                        "S": "Remove infrastructure as a barrier to innovation"
+                    },
+                    {
+                        "S": "Balance autonomy with security and cost controls"
+                    }
+                ]
+            },
+            "values": {
+                "L": [
+                    {
+                        "S": "Self-service provisioning with guardrails, not gates"
+                    },
+                    {
+                        "S": "Environment consistency that doesn't sacrifice performance"
+                    },
+                    {
+                        "S": "Cost visibility without becoming a bottleneck"
+                    },
+                    {
+                        "S": "Assistive tools that anticipate needs and remove friction"
+                    }
+                ]
+            },
+            "ascii_logo": {
+                "S": "       ╭──────────────────────────╮\n       │    ┌─────┐  ╔═══╗       │\n       │    │ ◉ ◉ │  ║ROB║       │\n       │    │  ▽  │  ║ CO║       │\n       │    └──┬──┘  ╚═══╝       │\n       │   ┌───┴───┐             │\n       │   │ ═══╪══ │  INDUSTRIES │\n       │   │  ║ ║  │             │\n       │   └──╨─╨──┘             │\n       ╰──────────────────────────╯"
+            },
+            "archetype": {
+                "S": "Speed-Driven"
+            },
+            "name": {
+                "S": "RobCo Industries"
+            },
+            "updated_at": {
+                "S": "2026-02-06T23:04:39Z"
+            },
+            "focus": {
+                "S": "Eliminating Friction as a Competitive Advantage"
+            },
+            "active": {
+                "BOOL": true
+            },
+            "background": {
+                "S": "RobCo Industries is the undisputed leader in robotics, automation, and artificial intelligence. Founded by the brilliant and notoriously uncompromising Robert House, the company attracts the world’s best engineers—and burns through them just as quickly.\n\nRobCo’s products range from domestic service robots to autonomous military platforms, all powered by increasingly sophisticated AI models. Speed is everything. Being first to market is more important than cost, comfort, or convention.\n\nRobCo’s engineering culture is famously chaotic: global teams, overnight deadlines, and a belief that infrastructure should never be the bottleneck."
+            },
+            "closing": {
+                "S": "RobCo believes the future belongs to whoever builds it first. They're not willing to wait for IT to catch up."
+            },
+            "persona": {
+                "S": "Marcus Chen (Robotics AI Engineer) — Marcus starts coding at 11 PM. That’s when his brain works best—and when half his team in Europe is online. His laptop groans as he spins up a robotics simulation. The fans scream. The system lags. Again.\n\nHe’s already lost hours this week to crashes. He knows the model should converge faster—but he simply doesn’t have the horsepower locally. So he does what everyone does: copies chunks of code to a personal machine “just to test something.”\n\nSecurity hates that. Marcus hates that security doesn’t understand deadlines.\n\nAt 3 AM, a simulation finally completes—but another engineer can’t reproduce the result. Different environment. Different performance. Different outcome.\n\nMarcus doesn’t care where his workstation lives.\nHe cares that when inspiration hits, the machine doesn’t get in the way."
+            },
+            "sort_order": {
+                "N": "2"
+            },
+            "quote": {
+                "S": "Why would I give a genius a weak machine? — Robert House"
+            }
+        },
+        {
+            "tension": {
+                "S": "Senior Scientists & Principal Investigators: Demand frozen environments once experiments begin. Fear even minor changes will invalidate years of work. Prefer isolation over collaboration. Measure success by repeatable, defensible results. Central IT & Research Operations: Struggling to support dozens of parallel environments. Wants standardization and lifecycle control. Pressured to reduce operational overhead. Measure success by manageability and scalability. Executive Leadership & Funding Committees: Want collaboration across labs. Expect faster results and shared insights. Increasingly skeptical of “we can’t change anything”."
+            },
+            "reality": {
+                "S": "Scientists at West Tek often refuse updates, fearing they will invalidate years of work. Some labs still rely on environments created years ago, while newer teams demand modern tools.\n\nIT teams struggle to support dozens of parallel configurations. A researcher transferring between labs may spend weeks just getting access to the “correct” environment. Mistakes are costly—one incorrect update recently forced a team to discard months of experimental data.\n\nAt the same time, leadership wants greater collaboration and shared analysis across labs. Scientists want reproducibility. IT wants sanity.\n\nWest Tek’s challenge isn’t performance or access—it’s how to preserve scientific truth while still allowing the organization to move forward."
+            },
+            "use_case_id": {
+                "N": "4"
+            },
+            "challenges": {
+                "L": [
+                    {
+                        "S": "Preserve exact configurations across decades"
+                    },
+                    {
+                        "S": "Detect and prevent drift before it corrupts results"
+                    },
+                    {
+                        "S": "Enable succession without loss of context"
+                    }
+                ]
+            },
+            "values": {
+                "L": [
+                    {
+                        "S": "Environment snapshots that capture complete state"
+                    },
+                    {
+                        "S": "Drift detection that alerts before damage occurs"
+                    },
+                    {
+                        "S": "Onboarding that transfers institutional knowledge"
+                    },
+                    {
+                        "S": "Assistive tools that enforce historical constraints"
+                    }
+                ]
+            },
+            "ascii_logo": {
+                "S": "        ╔════════════════════════════╗\n        ║    ╭─╮ ╭─╮   ╭─╮ ╭─╮      ║\n        ║    │█╰─╯█│   │█╰─╯█│      ║\n        ║    │█╭─╮█│   │█╭─╮█│      ║\n        ║    ╰─╯ ╰─╯   ╰─╯ ╰─╯      ║\n        ║      ╲     ╱              ║\n        ║       ╲   ╱   WEST TEK    ║\n        ║    ════╲═╱════            ║\n        ║        RESEARCH           ║\n        ╚════════════════════════════╝"
+            },
+            "archetype": {
+                "S": "Preservation-Driven"
+            },
+            "name": {
+                "S": "West Tek Research"
+            },
+            "updated_at": {
+                "S": "2026-02-06T23:26:45Z"
+            },
+            "focus": {
+                "S": "Environmental Fidelity and Scientific Continuity"
+            },
+            "active": {
+                "BOOL": true
+            },
+            "background": {
+                "S": "West Tek Research is the pinnacle of pre-war scientific ambition. Its laboratories explore advanced biotechnology, chemical enhancement, and human performance—often funded jointly by military and private interests.\n\nWest Tek scientists are meticulous. Once an experiment is validated, nothing should change. Not the OS. Not the application versions. Not the drivers. Stability equals truth.\n\nUnfortunately, West Tek operates dozens of labs worldwide, each funded by different programs, each frozen in time at different moments."
+            },
+            "closing": {
+                "S": "West Tek knows that their greatest enemy isn't failure—it's change they didn't intend."
+            },
+            "persona": {
+                "S": "Dr. James Whitmore (Senior FEV Researcher) — has been running the same experiment for 18 months. Every variable is controlled. Every result meticulously logged.\n\nOne morning, his environment behaves differently. Subtle. Almost imperceptible. But enough to invalidate the run.\n\nIT later confirms a minor update was applied “for stability.”\n\nStability, to Whitmore, means unchanged. He spends the rest of the week reconstructing his environment—painfully, manually—while deadlines slip and funding reviews loom.\n\nWhen Petrov collaborates with another lab overseas, it takes weeks to align environments. He doesn’t want new tools. He wants the same tools, forever, when it matters.\n\nProgress isn’t about speed.\nIt’s about trusting yesterday’s results tomorrow."
+            },
+            "sort_order": {
+                "N": "4"
+            },
+            "quote": {
+                "S": "Progress demands control. Mutation is... undesirable."
+            }
+        },
+        {
+            "tension": {
+                "S": "Creative Directors & Marketing Teams: Want instant access to high-performance tools. Expect flawless experience during campaign crunches. Don’t want to think about licenses or infrastructure. Measure success by campaign impact and speed. Finance & Procurement: Alarmed by spiky license usage and idle capacity. Want predictable spend and tighter controls. Measure success by cost efficiency. IT Operations: Tasked with onboarding/offboarding thousands of contractors. Struggling to keep environments consistent. Measure success by reduced ticket volume and stability."
+            },
+            "reality": {
+                "S": "Creative workloads spike unpredictably. During major campaigns, thousands of contractors need access to expensive design software for weeks—sometimes days. Outside of those peaks, usage drops sharply.\n\nToday, Nuka-Cola either overpays for licenses that sit idle or scrambles to provision access at the last minute. Contractors complain about slow machines. Finance complains about runaway costs. Marketing just wants things done now.\n\nExecutives want flexibility without waste. Creatives want performance without friction. IT wants control without becoming the bottleneck.\n\nNuka-Cola’s problem isn’t creativity—it’s how to scale imagination without scaling chaos."
+            },
+            "use_case_id": {
+                "N": "6"
+            },
+            "challenges": {
+                "L": [
+                    {
+                        "S": "Rapidly assemble and dissolve creative teams"
+                    },
+                    {
+                        "S": "Align tooling and access with campaign lifecycles"
+                    },
+                    {
+                        "S": "Prevent cost bleed during idle periods"
+                    },
+                    {
+                        "S": "Give creatives what they need only while they need it"
+                    }
+                ]
+            },
+            "values": {
+                "L": [
+                    {
+                        "S": "Campaign-driven onboarding and teardown"
+                    },
+                    {
+                        "S": "Usage visibility mapped to marketing timelines"
+                    },
+                    {
+                        "S": "Change communication that respects creative flow"
+                    },
+                    {
+                        "S": "Assistive tools that behave like a studio coordinator, not IT"
+                    }
+                ]
+            },
+            "ascii_logo": {
+                "S": "        ╭────────────────────────────╮\n        │      ╭───────╮             │\n        │      │ NUKA  │             │\n        │     ╭┴───────┴╮            │\n        │    ╱    ★      ╲           │\n        │   │   COLA    │           │\n        │   │  ~~~~~~   │           │\n        │    ╲__________╱            │\n        │      ╰──────╯              │\n        │   \"ZIP! ZAP! NUKA!\"       │\n        ╰────────────────────────────╯"
+            },
+            "archetype": {
+                "S": "Flexibility-Driven"
+            },
+            "name": {
+                "S": "Nuka-Cola Corporation"
+            },
+            "updated_at": {
+                "S": "2026-02-06T23:34:43Z"
+            },
+            "focus": {
+                "S": "Elasticity Without Waste"
+            },
+            "active": {
+                "BOOL": true
+            },
+            "background": {
+                "S": "Nuka-Cola is more than a beverage—it’s a cultural phenomenon. Marketing drives everything, from new product launches to national morale. Campaigns are bold, fast, and relentless.\n\nCreative teams span the globe. Designers, video editors, marketers, and agencies come and go with each campaign. Deadlines are immovable. Budgets are not."
+            },
+            "closing": {
+                "S": "Nuka-Cola knows the end might come suddenly. They still don't want to pay for licenses no one's using when it does."
+            },
+            "persona": {
+                "S": "Jamie Rivera (Senior Brand Designer) — Jamie’s day starts with chaos. A new campaign just dropped. The team doubled overnight—half contractors, half agencies, all remote.\n\nJamie spends the morning troubleshooting access issues instead of designing. Someone can’t open the video editor. Someone else is lagging badly. Finance is already asking why licenses spiked again.\n\nBy afternoon, things finally click. Creativity flows. But Jamie knows that next month, half these tools will sit unused—and no one will clean them up.\n\nJamie doesn’t want to think about infrastructure.\nThey want it to appear when needed—and disappear when it doesn’t."
+            },
+            "sort_order": {
+                "N": "6"
+            },
+            "quote": {
+                "S": "If it doesn't pop, it's not Nuka-Cola."
+            }
+        },
+        {
+            "tension": {
+                "S": "Vault Oversight Board (Executive Leadership): Demands absolute compartmentalization between Vaults. Wants provable guarantees that data cannot be copied, exported, or leaked. Will gladly sacrifice convenience for control. Measures success by “no one knows what we’re really doing”. Lead Researchers & External Academics: Need stable, predictable environments to ensure experimental validity. Want collaboration tools and shared methodologies\nAre frustrated by access delays and opaque restrictions. Measure success by published results and reproducibility. Internal IT & Compliance: Expected to enforce ironclad controls. Blamed when environments drift or access breaks\nPressured to move fast without creating new risk surfaces."
+            },
+            "reality": {
+                "S": "Vault-Tec’s workforce is a rotating cast of specialists who often don’t know who else is working on the same project. A behavioral scientist in Boston may analyze data from Vault 12 for three months, then be reassigned to Vault 77 with no access to prior materials. Contractors are flown in for narrow analyses, given just enough information to do their job, and then removed entirely.\n\nRight now, Vault-Tec is struggling with control and consistency.\n\nResearchers complain that their environments change without warning—applications update mid-study, settings drift, or access policies differ depending on where they log in from. A senior analyst recently flagged that two researchers reviewing the same Vault dataset produced conflicting results because their tools behaved differently.\n\nAt the same time, leadership is terrified of leaks. A misplaced dataset, an unauthorized export, or even a copied screenshot could expose experiments that would end the company overnight. Vault-Tec executives want ironclad control—but without slowing the velocity of research or relying on bespoke machines shipped to every facility.\n\nThe question haunting Vault-Tec isn’t can they give people access—it’s how much trust can be safely extended, and for how long, before the experiment itself is compromised."
+            },
+            "use_case_id": {
+                "N": "1"
+            },
+            "challenges": {
+                "L": [
+                    {
+                        "S": "Precisely define and enforce trust boundaries between Vaults, people, and time"
+                    },
+                    {
+                        "S": "Ensure that when personnel rotate, context does not leak with them"
+                    },
+                    {
+                        "S": "Preserve institutional memory without exposing the full picture to any individual"
+                    },
+                    {
+                        "S": "Analyst and experiment reports consistency between Vaults "
+                    }
+                ]
+            },
+            "values": {
+                "L": [
+                    {
+                        "S": "Guided onboarding that tells users how to work, not why"
+                    },
+                    {
+                        "S": "Change processes that preserve experimental continuity even as staff churn"
+                    },
+                    {
+                        "S": "Oversight mechanisms that prove control without requiring constant human review"
+                    },
+                    {
+                        "S": "Assistive tools that help users operate safely inside constraints they cannot see"
+                    }
+                ]
+            },
+            "ascii_logo": {
+                "S": "    ╔═══════════════════════════════╗\n    ║   ██╗   ██╗ █████╗ ██╗   ██╗  ║\n    ║   ██║   ██║██╔══██╗██║   ██║  ║\n    ║   ██║   ██║███████║██║   ██║  ║\n    ║   ╚██╗ ██╔╝██╔══██║██║   ██║  ║\n    ║    ╚████╔╝ ██║  ██║███████║   ║\n    ║     ╚═══╝  ╚═╝  ╚═╝╚══════╝   ║\n    ║      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄      ║\n    ║      █  VAULT-TEC  █      ║\n    ║      ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀      ║\n    ╚═══════════════════════════════╝"
+            },
+            "archetype": {
+                "S": "Secrecy-Driven"
+            },
+            "name": {
+                "S": "Vault-Tec Corporation"
+            },
+            "updated_at": {
+                "S": "2026-02-06T22:59:48Z"
+            },
+            "focus": {
+                "S": "Control, Trust Boundaries, and Institutional Memory"
+            },
+            "active": {
+                "BOOL": true
+            },
+            "background": {
+                "S": "Vault-Tec Corporation presents itself as the benevolent guardian of humanity’s future. Its public-facing mission is simple: protect America’s citizens from nuclear annihilation. Behind closed doors, Vault-Tec operates as a sprawling behavioral research conglomerate, orchestrating hundreds of isolated social experiments under strict secrecy.\n\nEach Vault represents a unique hypothesis—some psychological, some sociological, some ethically indefensible. Oversight committees, academic consultants, government observers, and internal researchers all touch the program, but never the same Vaults, and never at the same time.\n\nInformation isolation isn’t just policy—it’s foundational to Vault-Tec’s business model."
+            },
+            "closing": {
+                "S": "Vault-Tec assumes the world may not last forever. They want their experiments to outlive the people running them."
+            },
+            "persona": {
+                "S": "Dr. Evelyn Moore (Senior Behavioral Analyst) — Starts her day early, reviewing behavioral logs from Vault 43. She logs in from a secure Vault-Tec office, but tomorrow she’ll be working from a government research facility across the country.\n\nHer work is highly sensitive—participant reactions, environmental stress indicators, longitudinal psychological profiles. She isn’t allowed to know what other Vaults are testing, only that her data must not cross Vault boundaries.\n\nMidway through the day, Evelyn notices something unsettling: a colleague reviewing the same dataset sees slightly different behavior graphs. After several tense conversations, they realize their analysis tools are behaving differently. One environment had been updated. The other had not.\n\nEvelyn flags the issue. Leadership responds swiftly—but vaguely. “Access will be standardized.” No timeline. No explanation.\n\nLater that afternoon, a contractor joins the project. Evelyn must trust that they’ll see only what they’re allowed to see—and that when they’re gone, their access truly disappears.\n\nHer fear isn’t that someone is watching.\nIt’s that someone might not be watching closely enough."
+            },
+            "sort_order": {
+                "N": "1"
+            },
+            "quote": {
+                "S": "The Vaults are perfect because the people inside never know who's watching—or how."
+            }
+        },
+        {
+            "tension": {
+                "S": "Control Room Operators: Depend on muscle memory and unchanged interfaces. Distrust “modernization” efforts. Want absolute consistency across shifts and locations. Measure success by incidents avoided. Emergency Response & Field Engineering: Need immediate access during outages and disasters. Often operate outside primary facilities. Frustrated by access limitations during crises. Measure success by speed of response. Executive Leadership & Regulators: Demand resilience and disaster preparedness. Expect modernization without disruption. Measure success by uptime and compliance."
+            },
+            "reality": {
+                "S": "Control room operators rely on legacy Windows applications that only run in specific configurations. Replacing them would take years. Modernizing access is risky, but necessary—especially during emergencies.\n\nField engineers often need immediate access to control systems during outages or disasters. Today, that access depends on physical presence or unreliable remote setups that fail under pressure.\n\nPoseidon executives want resilience: systems that work during storms, outages, or evacuations. Operators want consistency. IT wants a way to modernize around legacy software without touching it.\n\nEvery decision Poseidon makes is haunted by a single question: how do you change nothing, while still preparing for everything?"
+            },
+            "use_case_id": {
+                "N": "5"
+            },
+            "challenges": {
+                "L": [
+                    {
+                        "S": "Ensure operators encounter nothing unfamiliar during emergencies"
+                    },
+                    {
+                        "S": "Validate readiness without introducing risk"
+                    },
+                    {
+                        "S": "Extend access safely to field engineers during crises"
+                    },
+                    {
+                        "S": "Provide leadership visibility without operational interference"
+                    }
+                ]
+            },
+            "values": {
+                "L": [
+                    {
+                        "S": "Onboarding that reinforces muscle memory"
+                    },
+                    {
+                        "S": "Change processes that minimize surprise"
+                    },
+                    {
+                        "S": "Dashboards focused on availability and readiness, not optimization"
+                    },
+                    {
+                        "S": "Assistive systems that guide action under stress, not exploration"
+                    }
+                ]
+            },
+            "ascii_logo": {
+                "S": "        ┌──────────────────────────┐\n        │         ╱│╲              │\n        │        ╱ │ ╲             │\n        │       ╱  │  ╲            │\n        │      ╱  ╱│╲  ╲           │\n        │     ▼  ▼ │ ▼  ▼          │\n        │    ═══════════════       │\n        │        ⚡ ⚡ ⚡            │\n        │    POSEIDON ENERGY       │\n        └──────────────────────────┘"
+            },
+            "archetype": {
+                "S": "Resilience-Driven"
+            },
+            "name": {
+                "S": "Poseidon Energy"
+            },
+            "updated_at": {
+                "S": "2026-02-06T23:31:03Z"
+            },
+            "focus": {
+                "S": "Resilience Under Stress"
+            },
+            "active": {
+                "BOOL": true
+            },
+            "background": {
+                "S": "Poseidon Energy runs the infrastructure that keeps the world alive—nuclear power plants, offshore energy platforms, and regional control centers that must operate without interruption.\n\nMuch of Poseidon’s software predates modern computing standards. It’s ugly, fragile, and irreplaceable. Operators are trained on specific workflows that cannot change without massive retraining efforts.\n\nFailures aren’t just expensive—they’re catastrophic."
+            },
+            "closing": {
+                "S": "Poseidon assumes failure is inevitable. They design for the moment when it arrives."
+            },
+            "persona": {
+                "S": "Linda Alvarez (Nuclear Control Room Operator) — Linda works twelve-hour shifts. Her interface hasn’t changed in a decade—and that’s intentional. Muscle memory keeps reactors stable.\n\nDuring a storm, a regional facility loses access to its primary control room. Engineers scramble to restore visibility. Remote access fails twice before coming online.\n\nLinda watches alarms cascade. Seconds matter.\n\nLater, leadership talks about modernization. Linda doesn’t want modern. She wants reliable. If something changes, it must behave exactly the same—every time.\n\nFor Poseidon, technology doesn’t enable business.\nIt keeps the lights on."
+            },
+            "sort_order": {
+                "N": "5"
+            },
+            "quote": {
+                "S": "Power doesn't forgive mistakes."
+            }
+        }
+    ],
+    "Count": 6,
+    "ScannedCount": 6,
+    "ConsumedCapacity": null
+}

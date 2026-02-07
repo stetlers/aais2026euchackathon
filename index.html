@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAIS 2026 EUC Hackathon</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* New Vegas background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('pre-war-new-vegas-is-absolutely-stunning-i-am-in-sheer-awe-v0-gqg29pm5z0kf1.jpg.webp') center center;
+            background-size: cover;
+            z-index: -2;
+        }
+
+        /* Dark overlay for better terminal contrast */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(0, 0, 0, 0.3) 0%,
+                rgba(0, 0, 0, 0.6) 50%,
+                rgba(0, 0, 0, 0.85) 100%
+            );
+            z-index: -1;
+        }
+
+        .monitor {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 50%, #0f0f0f 100%);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 
+                0 0 50px rgba(0, 0, 0, 0.9),
+                0 0 100px rgba(0, 255, 0, 0.1),
+                inset 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            border: 3px solid #333;
+        }
+
+        .monitor::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 3px solid #2a2a2a;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        .screen {
+            background: #001200;
+            border-radius: 20px;
+            padding: 40px;
+            width: 950px;
+            max-width: 90vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 
+                inset 0 0 100px rgba(0, 50, 0, 0.3),
+                0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        /* CRT curvature effect */
+        .screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                rgba(0, 0, 0, 0.2) 80%,
+                rgba(0, 0, 0, 0.4) 100%
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Scanlines - reduced opacity for better readability */
+        .screen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.05),
+                rgba(0, 0, 0, 0.05) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        .terminal {
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            color: #33ff33;
+            text-shadow: 0 0 2px #33ff33;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        .terminal h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ccffcc;
+            text-shadow: 0 0 3px #66ff66;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            92% { opacity: 0.9; }
+            94% { opacity: 1; }
+            97% { opacity: 0.85; }
+        }
+
+        .intro-sentence {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #aaffaa;
+            font-size: 22px;
+        }
+
+        .intro-text {
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+
+        .menu-header {
+            margin: 25px 0 15px 0;
+            border-top: 1px solid #00ff00;
+            border-bottom: 1px solid #00ff00;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .menu-option {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+
+        .menu-option .number {
+            color: #aaffaa;
+            font-size: 22px;
+        }
+
+        .menu-option .company {
+            color: #eeffee;
+            font-size: 22px;
+            text-shadow: 0 0 2px #88ff88;
+        }
+
+        .menu-option .quote {
+            color: #66dd66;
+        }
+
+        .menu-option .archetype {
+            color: #ffcc66;
+            font-size: 18px;
+        }
+
+        .input-line {
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        .prompt {
+            color: #00ffaa;
+            margin-right: 10px;
+        }
+
+        #user-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff00;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            text-shadow: 
+                0 0 5px #00ff00,
+                0 0 10px #00ff00;
+            width: 50px;
+            caret-color: #00ff00;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 12px;
+            height: 20px;
+            background: #00ff00;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #33ff33;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        #scenario-view {
+            max-height: 500px;
+            overflow-y: auto;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+        }
+
+        #scenario-content {
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+        }
+
+        #main-menu {
+            max-height: 500px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Custom scrollbar styling */
+        #main-menu::-webkit-scrollbar,
+        #scenario-view::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        #main-menu::-webkit-scrollbar-track,
+        #scenario-view::-webkit-scrollbar-track {
+            background: #001a00;
+            border: 1px solid #224422;
+        }
+
+        #main-menu::-webkit-scrollbar-thumb,
+        #scenario-view::-webkit-scrollbar-thumb {
+            background: #33aa33;
+            border: 1px solid #44cc44;
+            box-shadow: inset 0 0 5px #00ff00;
+        }
+
+        #main-menu::-webkit-scrollbar-thumb:hover,
+        #scenario-view::-webkit-scrollbar-thumb:hover {
+            background: #44cc44;
+        }
+
+        /* Scroll indicators */
+        .scroll-indicator {
+            position: sticky;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 16px;
+            color: #66ff66;
+            padding: 5px;
+            background: linear-gradient(to bottom, #001200 0%, transparent 100%);
+            z-index: 5;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .scroll-indicator.top {
+            top: 0;
+            background: linear-gradient(to bottom, #001200 0%, transparent 100%);
+        }
+
+        .scroll-indicator.bottom {
+            bottom: 0;
+            background: linear-gradient(to top, #001200 0%, transparent 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        #scenario-view h2 {
+            color: #ccffcc;
+            font-size: 26px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 3px #66ff66;
+        }
+
+        #scenario-view h3 {
+            color: #aaffaa;
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #336633;
+            padding-bottom: 5px;
+        }
+
+        #scenario-view p {
+            margin-bottom: 12px;
+            line-height: 1.5;
+            color: #33ff33;
+        }
+
+        #scenario-view .quote-block {
+            color: #88dd88;
+            font-style: italic;
+            font-size: 22px;
+            padding: 15px;
+            border-left: 3px solid #44aa44;
+            margin-bottom: 20px;
+            background: rgba(0, 100, 0, 0.1);
+        }
+
+        .ascii-logo {
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            line-height: 1.2;
+            color: #44ff44;
+            text-shadow: 0 0 5px #00aa00;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid #336633;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        #scenario-view ul {
+            margin: 10px 0 15px 25px;
+        }
+
+        #scenario-view li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+            color: #33ff33;
+        }
+
+        #scenario-view strong {
+            color: #ccffcc;
+        }
+
+        #scenario-view .closing {
+            margin-top: 25px;
+            font-style: italic;
+            color: #88dd88;
+            border-top: 1px solid #336633;
+            padding-top: 15px;
+        }
+
+        .return-prompt {
+            text-align: center;
+            margin-top: 20px;
+            color: #66aa66;
+            visibility: hidden;
+        }
+
+        #return-btn {
+            background: transparent;
+            border: 1px solid #33ff33;
+            color: #aaffaa;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #return-btn:hover {
+            background: rgba(0, 255, 0, 0.1);
+            color: #ccffcc;
+        }
+
+        #main-menu.hidden, #scenario-view.hidden, #judging-view.hidden {
+            display: none;
+        }
+
+        #judging-view {
+            max-height: 500px;
+            overflow-y: auto;
+            color: #33ff33;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+        }
+
+        #judging-content h2 {
+            color: #ccffcc;
+            font-size: 26px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 3px #66ff66;
+        }
+
+        #judging-content h3 {
+            color: #aaffaa;
+            font-size: 20px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #336633;
+            padding-bottom: 5px;
+        }
+
+        #judging-content p {
+            margin-bottom: 12px;
+            line-height: 1.5;
+            color: #33ff33;
+        }
+
+        #judging-content ul {
+            margin: 10px 0 15px 25px;
+        }
+
+        #judging-content li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+            color: #33ff33;
+        }
+
+        #judging-content strong {
+            color: #ccffcc;
+        }
+
+        #judging-content .quote-block {
+            color: #88dd88;
+            font-style: italic;
+            font-size: 22px;
+            padding: 15px;
+            border-left: 3px solid #44aa44;
+            margin-bottom: 20px;
+            background: rgba(0, 100, 0, 0.1);
+        }
+
+        #judging-content .closing {
+            margin-top: 25px;
+            font-style: italic;
+            color: #88dd88;
+            border-top: 1px solid #336633;
+            padding-top: 15px;
+        }
+
+        #judging-view .return-prompt {
+            font-family: 'VT323', monospace;
+        }
+
+        #judging-view #return-btn-judging {
+            font-family: 'VT323', monospace;
+        }
+
+
+        /* Power LED */
+        .power-led {
+            position: absolute;
+            bottom: 15px;
+            right: 50px;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ff00;
+            animation: led-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes led-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="monitor">
+        <div class="screen">
+            <div class="terminal">
+                <h1>>>> WELCOME TO THE AAIS 2026 EUC HACKATHON <<<</h1>
+                
+            <div id="main-menu">
+                <div class="intro-sentence">
+                    Our AAIS 2026 EUC Hackathon is set in the Fallout universe. Each team will get an opportunity to select from one of six use case scenarios.
+                </div>
+                <div class="scroll-indicator top" id="menu-scroll-top">▲ SCROLL UP ▲</div>
+                <div class="intro-text">
+                    Fallout became a massive, breakout hit for Amazon Prime Video, attracting over 65 million viewers in its first 16 days. Premiering in April 2024, it secured the spot as the platform's second-most-watched title ever, driving major engagement from international audiences. Season 2 has been an incredible success as well, and to celebrate Amazon's beloved series, we modeled all scenarios in the pre-war universe of Fallout, during the final years before the Great War.
+                </div>
+
+                <div class="menu-header" id="menu-header">[ LOADING USE CASES... ]</div>
+
+                <div id="use-case-menu"></div>
+
+                <div class="input-line">
+                    <span class="prompt">&gt;&gt;&gt;</span>
+                    <input type="text" id="user-input" maxlength="1" autofocus>
+                    <span class="cursor"></span>
+                </div>
+
+                <div id="response" class="response hidden"></div>
+                <div class="scroll-indicator bottom" id="menu-scroll-bottom">▼ SCROLL DOWN ▼</div>
+            </div>
+            </div>
+
+            <div id="scenario-view" class="hidden">
+                <div class="scroll-indicator top" id="scenario-scroll-top">▲ SCROLL UP ▲</div>
+                <div id="scenario-content"></div>
+                <div class="scroll-indicator bottom" id="scenario-scroll-bottom">▼ SCROLL DOWN ▼</div>
+                <div class="return-prompt">
+                    <br>
+                    <span>════════════════════════════════════════════════════════</span>
+                    <br><br>
+                    <button id="return-btn">>>> PRESS ANY KEY TO RETURN | PRESS 'P' TO PRINT <<<</button>
+                </div>
+            </div>
+
+            <div id="judging-view" class="hidden">
+                <div class="scroll-indicator top" id="judging-scroll-top">▲ SCROLL UP ▲</div>
+                <div id="judging-content">
+                    <h2>JUDGING CRITERIA</h2>
+                    <div class="quote-block">Each team will be scored from 1 to 5 points (5 being the highest) across four categories. Maximum possible score: 20 points.</div>
+
+                    <h3>CATEGORY 1: PRESENTATION (1-5 Points)</h3>
+                    <p>How effectively does your team communicate the solution?</p>
+                    <ul>
+                        <li><strong>Clarity:</strong> Is the problem and solution clearly articulated?</li>
+                        <li><strong>Storytelling:</strong> Does the presentation engage the audience and create a compelling narrative?</li>
+                        <li><strong>Demo Quality:</strong> Is the live demonstration smooth, well-rehearsed, and impactful?</li>
+                        <li><strong>Visual Design:</strong> Are slides, diagrams, and UI elements professional and easy to understand?</li>
+                        <li><strong>Time Management:</strong> Does the team use their allotted time effectively?</li>
+                    </ul>
+
+                    <h3>CATEGORY 2: INNOVATION (1-5 Points)</h3>
+                    <p>How creative and original is your approach?</p>
+                    <ul>
+                        <li><strong>Originality:</strong> Does the solution offer a fresh perspective or novel approach?</li>
+                        <li><strong>Problem-Solving:</strong> Are creative methods used to address the use case challenges?</li>
+                        <li><strong>Differentiation:</strong> What makes this solution stand out from conventional approaches?</li>
+                        <li><strong>Risk-Taking:</strong> Did the team push boundaries or try something ambitious?</li>
+                        <li><strong>Future Potential:</strong> Does the solution open doors for further innovation?</li>
+                    </ul>
+
+                    <h3>CATEGORY 3: FUNCTIONALITY (1-5 Points)</h3>
+                    <p>Does the solution actually work and solve the problem?</p>
+                    <ul>
+                        <li><strong>Core Features:</strong> Are the essential features implemented and operational?</li>
+                        <li><strong>Reliability:</strong> Does the solution perform consistently without errors?</li>
+                        <li><strong>User Experience:</strong> Is the solution intuitive and easy to use?</li>
+                        <li><strong>Completeness:</strong> How fully does the solution address the use case requirements?</li>
+                        <li><strong>Technical Execution:</strong> Is the code well-structured, efficient, and maintainable?</li>
+                    </ul>
+
+                    <h3>CATEGORY 4: AWS WELL-ARCHITECTED PRINCIPLES (1-5 Points)</h3>
+                    <p>How well does your solution align with AWS best practices?</p>
+                    <ul>
+                        <li><strong>Operational Excellence:</strong> Can the solution be monitored, improved, and operated effectively?</li>
+                        <li><strong>Security:</strong> Are data and systems protected through proper controls and practices?</li>
+                        <li><strong>Reliability:</strong> Will the solution recover from failures and meet availability requirements?</li>
+                        <li><strong>Performance Efficiency:</strong> Are resources used efficiently to meet system requirements?</li>
+                        <li><strong>Cost Optimization:</strong> Does the architecture avoid unnecessary costs while delivering value?</li>
+                        <li><strong>Sustainability:</strong> Does the solution minimize environmental impact?</li>
+                    </ul>
+
+                    <h3>REQUIRED TOOL: AMAZON KIRO</h3>
+                    <p>All teams are expected to use <strong>Amazon Kiro</strong> as their primary development environment to realize creative visions and make solutions truly unique.</p>
+                    <p>Amazon Kiro provides:</p>
+                    <ul>
+                        <li><strong>AI-Assisted Development:</strong> Leverage intelligent code suggestions and automation</li>
+                        <li><strong>Rapid Prototyping:</strong> Quickly iterate on ideas and bring concepts to life</li>
+                        <li><strong>Integrated AWS Services:</strong> Seamlessly connect with AWS infrastructure</li>
+                        <li><strong>Collaborative Features:</strong> Work together in real-time with your team</li>
+                    </ul>
+                    <p>Judges will consider how effectively teams leverage Kiro's capabilities to accelerate development and enhance their solutions.</p>
+
+                    <h3>EXPECTED AWS SERVICES</h3>
+                    <p>Teams are expected to build solutions using native AWS services. Consider incorporating:</p>
+                    <ul>
+                        <li><strong>Amazon Bedrock:</strong> Build generative AI applications with foundation models</li>
+                        <li><strong>AWS Lambda:</strong> Run code without provisioning or managing servers</li>
+                        <li><strong>Amazon CloudWatch:</strong> Monitor applications and infrastructure with observability</li>
+                        <li><strong>Amazon EventBridge:</strong> Build event-driven architectures at scale</li>
+                        <li><strong>Amazon S3:</strong> Scalable object storage for any data type</li>
+                        <li><strong>Amazon DynamoDB:</strong> Fast, flexible NoSQL database service</li>
+                        <li><strong>AWS Step Functions:</strong> Coordinate distributed applications and microservices</li>
+                        <li><strong>Amazon API Gateway:</strong> Create, publish, and manage APIs</li>
+                    </ul>
+                    <p>Effective use of AWS native services demonstrates cloud-native thinking and will be considered when evaluating AWS Well-Architected alignment.</p>
+
+                    <p class="closing">Remember: The best solutions balance all four categories. A beautiful presentation without functionality, or a working solution that ignores security—neither will achieve top marks. Strive for excellence across the board.</p>
+                </div>
+                <div class="scroll-indicator bottom" id="judging-scroll-bottom">▼ SCROLL DOWN ▼</div>
+                <div class="return-prompt">
+                    <br>
+                    <span>════════════════════════════════════════════════════════</span>
+                    <br><br>
+                    <button id="return-btn-judging">>>> PRESS ANY KEY TO RETURN | PRESS 'P' TO PRINT <<<</button>
+                </div>
+            </div>
+        </div>
+        <div class="power-led"></div>
+    </div>
+
+    <script>
+        const input = document.getElementById('user-input');
+        const response = document.getElementById('response');
+        const cursor = document.querySelector('.cursor');
+        const mainMenu = document.getElementById('main-menu');
+        const scenarioView = document.getElementById('scenario-view');
+        const scenarioContent = document.getElementById('scenario-content');
+        const judgingView = document.getElementById('judging-view');
+
+        // Block reveal typewriter effect
+        function typeWriter(element, html, speed = 30, callback) {
+            // Create a temporary container to parse the HTML
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            const blocks = Array.from(temp.children);
+            
+            element.innerHTML = '';
+            let i = 0;
+            
+            function revealNext() {
+                if (i < blocks.length) {
+                    element.appendChild(blocks[i].cloneNode(true));
+                    element.scrollTop = element.scrollHeight;
+                    i++;
+                    setTimeout(revealNext, speed);
+                } else if (callback) {
+                    callback();
+                }
+            }
+            revealNext();
+        }
+
+        // Track if this is the first visit
+        let isFirstVisit = true;
+
+        // Typewriter for main menu on load
+        function initMainMenu() {
+            const children = Array.from(mainMenu.children);
+            children.forEach(child => child.style.opacity = '0');
+            
+            let i = 0;
+            function revealNext() {
+                if (i < children.length) {
+                    children[i].style.transition = 'opacity 0.1s';
+                    children[i].style.opacity = '1';
+                    i++;
+                    setTimeout(revealNext, 80);
+                } else {
+                    // On first visit, scroll to top so user can read
+                    if (isFirstVisit) {
+                        mainMenu.scrollTop = 0;
+                        isFirstVisit = false;
+                    }
+                    input.focus();
+                }
+            }
+            revealNext();
+        }
+
+        window.addEventListener('load', async () => {
+            await loadUseCases();
+            initMainMenu();
+        });
+
+        const API_URL = 'https://fc4xp2lydj.execute-api.us-east-1.amazonaws.com/prod';
+        
+        // These will be populated from the API
+        let loadingMessages = {};
+        let useCases = {};
+        let useCaseCount = 0;
+
+        // Build use case HTML content from API data
+        function buildUseCaseHtml(uc, index) {
+            // Use ascii_logo from API if available
+            const logo = uc.ascii_logo ? `<pre class="ascii-logo">${uc.ascii_logo}</pre>` : '';
+            let html = `<h2>USE CASE ${index}: ${uc.name.toUpperCase()} [${uc.archetype}]</h2>\n`;
+            html += logo;
+            html += `<div class="quote-block">"${uc.quote}"</div>\n\n`;
+            html += `<h3>BACKGROUND</h3>\n<p>${uc.background}</p>\n\n`;
+            html += `<h3>BUSINESS REALITY</h3>\n<p>${uc.reality.replace(/\n/g, '</p>\n<p>')}</p>\n\n`;
+            html += `<h3>USER PERSONA</h3>\n<p><strong>${uc.persona.split(' — ')[0]}</strong> — ${uc.persona.split(' — ')[1] || ''}</p>\n\n`;
+            html += `<h3>STAKEHOLDER TENSION</h3>\n<p>${uc.tension}</p>\n\n`;
+            html += `<h3>EVALUATION FOCUS: ${uc.focus}</h3>\n`;
+            if (uc.challenges && uc.challenges.length > 0) {
+                html += `<ul>\n${uc.challenges.map(c => `<li>${c}</li>`).join('\n')}\n</ul>\n`;
+            }
+            if (uc.values && uc.values.length > 0) {
+                html += `<p>The panel values:</p>\n<ul>\n${uc.values.map(v => `<li>${v}</li>`).join('\n')}\n</ul>\n`;
+            }
+            html += `<p class="closing">${uc.closing}</p>`;
+            return html;
+        }
+
+        // Fetch use cases from API and populate menu
+        async function loadUseCases() {
+            try {
+                const response = await fetch(`${API_URL}/use-cases`);
+                if (!response.ok) throw new Error('Failed to fetch use cases');
+                const data = await response.json();
+                
+                const useCaseMenu = document.getElementById('use-case-menu');
+                const menuHeader = document.getElementById('menu-header');
+                useCaseMenu.innerHTML = '';
+                
+                // Sort by sort_order and filter active
+                const sortedUseCases = data.use_cases
+                    .filter(uc => uc.active !== false)
+                    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+                
+                useCaseCount = sortedUseCases.length;
+                
+                sortedUseCases.forEach((uc, idx) => {
+                    const num = idx + 1;
+                    const menuOption = document.createElement('div');
+                    menuOption.className = 'menu-option';
+                    menuOption.innerHTML = `
+                        <span class="number">[${num}]</span> 
+                        <span class="company">${uc.name}:</span> 
+                        <span class="quote">"${uc.quote}"</span> 
+                        <span class="archetype">[${uc.archetype}]</span>
+                    `;
+                    useCaseMenu.appendChild(menuOption);
+                    
+                    // Build loading message - use custom one from API if available
+                    loadingMessages[String(num)] = uc.loading_message 
+                        ? `${uc.name.toUpperCase()} - ${uc.loading_message}`
+                        : `${uc.name.toUpperCase()} - Loading ${uc.name} protocols...`;
+                    
+                    // Build full use case content
+                    useCases[String(num)] = buildUseCaseHtml(uc, num);
+                });
+                
+                menuHeader.textContent = `[ SELECT USE CASE: ENTER 1-${useCaseCount} | PRESS J FOR JUDGING CRITERIA | PRESS L TO LOGIN ]`;
+                
+            } catch (error) {
+                console.error('Error loading use cases:', error);
+                document.getElementById('use-case-menu').innerHTML = '<div class="menu-option" style="color: #ff6666;">>>> ERROR: FAILED TO LOAD USE CASES. PLEASE REFRESH. <<<</div>';
+            }
+        }
+
+        let currentState = 'menu';
+        let selectedCase = null;
+        let currentUseCaseData = null; // Store current use case for printing
+
+        input.addEventListener('input', function(e) {
+            const value = e.target.value.toUpperCase();
+            
+            if (currentState === 'menu') {
+                if (value === 'J') {
+                    response.classList.remove('hidden');
+                    response.innerHTML = '<strong>ACCESSING:</strong> JUDGING CRITERIA - Loading evaluation parameters...<br><br>>>> PRESS ENTER TO CONTINUE <<<';
+                    selectedCase = 'judging';
+                    setTimeout(() => mainMenu.scrollTop = mainMenu.scrollHeight, 50);
+                } else if (value === 'L') {
+                    response.classList.remove('hidden');
+                    response.innerHTML = '<strong>ACCESSING:</strong> LOGIN PORTAL - Connecting to authentication server...<br><br>>>> PRESS ENTER TO CONTINUE <<<';
+                    selectedCase = 'login';
+                    setTimeout(() => mainMenu.scrollTop = mainMenu.scrollHeight, 50);
+                } else if (value && loadingMessages[value]) {
+                    response.classList.remove('hidden');
+                    response.innerHTML = `<strong>ACCESSING:</strong> ${loadingMessages[value]}<br><br>>>> PRESS ENTER TO CONTINUE <<<`;
+                    selectedCase = value;
+                    setTimeout(() => mainMenu.scrollTop = mainMenu.scrollHeight, 50);
+                } else if (value && !loadingMessages[value]) {
+                    response.classList.remove('hidden');
+                    response.innerHTML = `>>> ERROR: INVALID SELECTION. ENTER 1-${useCaseCount}, J, OR L <<<`;
+                    selectedCase = null;
+                    setTimeout(() => mainMenu.scrollTop = mainMenu.scrollHeight, 50);
+                } else {
+                    response.classList.add('hidden');
+                    selectedCase = null;
+                }
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && currentState === 'menu' && selectedCase) {
+                e.preventDefault();
+                response.innerHTML += '<br><br>Loading... Please stand by.';
+                setTimeout(() => {
+                    if (selectedCase === 'login') {
+                        window.location.href = 'login.html';
+                    } else if (selectedCase === 'judging') {
+                        showJudging();
+                    } else {
+                        showScenario(selectedCase);
+                    }
+                }, 1000);
+            }
+        });
+
+        function showScenario(caseNum) {
+            mainMenu.classList.add('hidden');
+            scenarioView.classList.remove('hidden');
+            currentState = 'scenario';
+            scenarioView.scrollTop = 0;
+            document.querySelector('.screen').scrollTop = 0;
+            
+            // Store current use case data for printing
+            currentUseCaseData = { num: caseNum, html: useCases[caseNum] };
+            
+            // Type out the scenario content
+            typeWriter(scenarioContent, useCases[caseNum], 2, () => {
+                document.querySelector('.return-prompt').style.visibility = 'visible';
+            });
+        }
+
+        function showJudging() {
+            mainMenu.classList.add('hidden');
+            judgingView.classList.remove('hidden');
+            currentState = 'judging';
+            judgingView.scrollTop = 0;
+            document.querySelector('#judging-view .return-prompt').style.visibility = 'visible';
+        }
+
+        function returnToMenu() {
+            scenarioView.classList.add('hidden');
+            judgingView.classList.add('hidden');
+            mainMenu.classList.remove('hidden');
+            response.classList.add('hidden');
+            input.value = '';
+            selectedCase = null;
+            currentState = 'menu';
+            document.querySelectorAll('.return-prompt').forEach(el => el.style.visibility = 'hidden');
+            // Delay focus to prevent the triggering keypress from being captured
+            setTimeout(() => input.focus(), 100);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (currentState === 'scenario') {
+                e.preventDefault();
+                if (e.key.toUpperCase() === 'P' && currentUseCaseData) {
+                    openPrintView(currentUseCaseData);
+                } else {
+                    returnToMenu();
+                }
+            } else if (currentState === 'judging') {
+                e.preventDefault();
+                if (e.key.toUpperCase() === 'P') {
+                    openJudgingPrintView();
+                } else {
+                    returnToMenu();
+                }
+            }
+        });
+
+        // Open dot-matrix style print view in new tab
+        function openPrintView(useCaseData) {
+            const printWindow = window.open('', '_blank');
+            const printHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>USE CASE ${useCaseData.num} - PRINTOUT</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Share+Tech+Mono&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #f5f5dc;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            padding: 0;
+        }
+        
+        .paper {
+            max-width: 8.5in;
+            margin: 0 auto;
+            background: repeating-linear-gradient(
+                #f9f9e8,
+                #f9f9e8 1.4em,
+                #e8f5e8 1.4em,
+                #e8f5e8 2.8em
+            );
+            padding: 0.5in 0.75in;
+            min-height: 11in;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        /* Tractor feed holes */
+        .paper::before,
+        .paper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 0.5in;
+            background: repeating-linear-gradient(
+                transparent,
+                transparent 0.4in,
+                #ddd 0.4in,
+                #ddd 0.45in,
+                transparent 0.45in,
+                transparent 0.55in
+            );
+        }
+        
+        .paper::before { left: 0; }
+        .paper::after { right: 0; }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header-title {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .header-date {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 14px;
+            margin: 20px 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        ul {
+            margin: 10px 0 15px 20px;
+            list-style-type: none;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        li::before {
+            content: '*';
+            position: absolute;
+            left: 0;
+            color: #333;
+        }
+        
+        .quote-block {
+            font-style: italic;
+            padding: 10px 20px;
+            margin: 15px 0;
+            border-left: 3px solid #333;
+            background: rgba(0,0,0,0.03);
+        }
+        
+        .closing {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px dashed #333;
+            font-style: italic;
+        }
+        
+        .ascii-logo {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.1;
+            white-space: pre;
+            margin: 15px auto;
+            display: block;
+            text-align: center;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #999;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2a5a2a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .print-btn:hover {
+            background: #3a7a3a;
+        }
+        
+        @media print {
+            .print-btn { display: none; }
+            body { background: white; }
+            .paper { 
+                box-shadow: none; 
+                margin: 0;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn" onclick="window.print()">🖨️ PRINT DOCUMENT</button>
+    <div class="paper">
+        <div class="content">
+            <div class="header">
+                <div class="header-title">═══ AAIS 2026 EUC HACKATHON ═══</div>
+                <div class="header-title">USE CASE BRIEFING DOCUMENT</div>
+                <div class="header-date">PRINTED: ${new Date().toLocaleString()}</div>
+            </div>
+            ${useCaseData.html}
+            <div class="footer">
+                ═══ END OF DOCUMENT ═══<br>
+                PROPERTY OF AAIS 2026 EUC HACKATHON | CLASSIFICATION: TEAM EYES ONLY
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+            printWindow.document.write(printHtml);
+            printWindow.document.close();
+        }
+
+        // Open dot-matrix style print view for Judging Criteria
+        function openJudgingPrintView() {
+            const judgingHtml = document.getElementById('judging-content').innerHTML;
+            const printWindow = window.open('', '_blank');
+            const printHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JUDGING CRITERIA - PRINTOUT</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Share+Tech+Mono&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #f5f5dc;
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            padding: 0;
+        }
+        
+        .paper {
+            max-width: 8.5in;
+            margin: 0 auto;
+            background: repeating-linear-gradient(
+                #f9f9e8,
+                #f9f9e8 1.4em,
+                #e8f5e8 1.4em,
+                #e8f5e8 2.8em
+            );
+            padding: 0.5in 0.75in;
+            min-height: 11in;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        /* Tractor feed holes */
+        .paper::before,
+        .paper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 0.5in;
+            background: repeating-linear-gradient(
+                transparent,
+                transparent 0.4in,
+                #ddd 0.4in,
+                #ddd 0.45in,
+                transparent 0.45in,
+                transparent 0.55in
+            );
+        }
+        
+        .paper::before { left: 0; }
+        .paper::after { right: 0; }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .header-title {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .header-date {
+            font-size: 10px;
+            color: #888;
+        }
+        
+        h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 14px;
+            margin: 20px 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        
+        ul {
+            margin: 10px 0 15px 20px;
+            list-style-type: none;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        li::before {
+            content: '*';
+            position: absolute;
+            left: 0;
+            color: #333;
+        }
+        
+        .quote-block {
+            font-style: italic;
+            padding: 10px 20px;
+            margin: 15px 0;
+            border-left: 3px solid #333;
+            background: rgba(0,0,0,0.03);
+        }
+        
+        .closing {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px dashed #333;
+            font-style: italic;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #999;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2a5a2a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .print-btn:hover {
+            background: #3a7a3a;
+        }
+        
+        @media print {
+            .print-btn { display: none; }
+            body { background: white; }
+            .paper { 
+                box-shadow: none; 
+                margin: 0;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn" onclick="window.print()">🖨️ PRINT DOCUMENT</button>
+    <div class="paper">
+        <div class="content">
+            <div class="header">
+                <div class="header-title">═══ AAIS 2026 EUC HACKATHON ═══</div>
+                <div class="header-title">OFFICIAL JUDGING CRITERIA</div>
+                <div class="header-date">PRINTED: ${new Date().toLocaleString()}</div>
+            </div>
+            ${judgingHtml}
+            <div class="footer">
+                ═══ END OF DOCUMENT ═══<br>
+                PROPERTY OF AAIS 2026 EUC HACKATHON | FOR PANELIST & TEAM REFERENCE
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+            printWindow.document.write(printHtml);
+            printWindow.document.close();
+        }
+
+        document.getElementById('return-btn').addEventListener('click', returnToMenu);
+        document.getElementById('return-btn-judging').addEventListener('click', returnToMenu);
+
+        // Hide cursor when typing
+        input.addEventListener('focus', () => cursor.style.opacity = '0');
+        input.addEventListener('blur', () => cursor.style.opacity = '1');
+
+        // Keep input focused when on menu
+        document.addEventListener('click', () => {
+            if (currentState === 'menu') input.focus();
+        });
+
+        // Scroll indicator logic
+        function updateScrollIndicators(container, topIndicator, bottomIndicator) {
+            const scrollTop = container.scrollTop;
+            const scrollHeight = container.scrollHeight;
+            const clientHeight = container.clientHeight;
+            
+            // Show top indicator if scrolled down
+            topIndicator.style.display = scrollTop > 10 ? 'block' : 'none';
+            
+            // Show bottom indicator if more content below
+            bottomIndicator.style.display = (scrollTop + clientHeight < scrollHeight - 10) ? 'block' : 'none';
+        }
+
+        const menuScrollTop = document.getElementById('menu-scroll-top');
+        const menuScrollBottom = document.getElementById('menu-scroll-bottom');
+        const scenarioScrollTop = document.getElementById('scenario-scroll-top');
+        const scenarioScrollBottom = document.getElementById('scenario-scroll-bottom');
+        const judgingScrollTop = document.getElementById('judging-scroll-top');
+        const judgingScrollBottom = document.getElementById('judging-scroll-bottom');
+
+        // Initial state
+        menuScrollTop.style.display = 'none';
+        scenarioScrollTop.style.display = 'none';
+        judgingScrollTop.style.display = 'none';
+
+        // Update on scroll
+        mainMenu.addEventListener('scroll', () => {
+            updateScrollIndicators(mainMenu, menuScrollTop, menuScrollBottom);
+        });
+
+        scenarioView.addEventListener('scroll', () => {
+            updateScrollIndicators(scenarioView, scenarioScrollTop, scenarioScrollBottom);
+        });
+
+        judgingView.addEventListener('scroll', () => {
+            updateScrollIndicators(judgingView, judgingScrollTop, judgingScrollBottom);
+        });
+
+        // Initial check after load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateScrollIndicators(mainMenu, menuScrollTop, menuScrollBottom);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
