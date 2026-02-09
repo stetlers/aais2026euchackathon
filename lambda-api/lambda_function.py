@@ -15,6 +15,9 @@ scores_table = dynamodb.Table('aais-hackathon-scores')
 use_cases_table = dynamodb.Table('aais-hackathon-use-cases')
 judging_criteria_table = dynamodb.Table('aais-hackathon-judging-criteria')
 
+# Initialize Bedrock
+bedrock_runtime = boto3.client('bedrock-runtime', region_name='us-east-1')
+
 # JWT Secret (in production, use AWS Secrets Manager)
 JWT_SECRET = os.environ.get('JWT_SECRET', 'aais-hackathon-2026-secret-key')
 
@@ -138,6 +141,10 @@ def lambda_handler(event, context):
         if path.startswith('/team-card/') and http_method == 'GET':
             team_id = path.split('/')[-1]
             return get_public_team_card(team_id)
+        
+        # Public AI generation route (no auth required for registration)
+        if path == '/ai/generate' and http_method == 'POST':
+            return generate_ai_text(body)
         
         # Protected routes - require auth
         auth = get_auth_context(event)
@@ -280,6 +287,7 @@ def team_register(body):
     team_id = body.get('team_id', '').lower().strip().replace(' ', '-')
     team_name = body.get('team_name', '')
     password = body.get('password', '')
+    catchphrase = body.get('catchphrase', '')
     
     if not team_id or not password or not team_name:
         return response(400, {'error': 'team_id, team_name, and password required'})
@@ -298,6 +306,7 @@ def team_register(body):
             'team_id': team_id,
             'team_name': team_name,
             'password': password,
+            'catchphrase': catchphrase,
             'use_case': 0,
             'use_case_name': '',
             'solution_description': '',
@@ -354,6 +363,83 @@ def panelist_login(body):
         })
     except Exception as e:
         return response(500, {'error': str(e)})
+
+# AI Text Generation handler (Bedrock)
+def generate_ai_text(body):
+    """Generate Fallout-themed text using Amazon Bedrock"""
+    generation_type = body.get('type', '')
+    input_text = body.get('text', '')
+    team_name = body.get('team_name', '')
+    
+    if not generation_type:
+        return response(400, {'error': 'type is required (catchphrase or solution)'})
+    
+    try:
+        if generation_type == 'catchphrase':
+            if not team_name:
+                return response(400, {'error': 'team_name is required for catchphrase generation'})
+            
+            prompt = f"""You are a creative writer for Vault-Tec Corporation in the Fallout universe. Generate a short, memorable team catchphrase (maximum 10 words) for a hackathon team called "{team_name}". 
+
+The catchphrase should:
+- Fit the retro-futuristic 1950s atomic age aesthetic of Fallout
+- Be catchy and memorable
+- Optionally reference vault life, wasteland survival, or pre-war optimism
+- Be appropriate for a professional hackathon
+
+Respond with ONLY the catchphrase, no quotes, no explanation."""
+
+        elif generation_type == 'solution':
+            if not input_text:
+                return response(400, {'error': 'text is required for solution enhancement'})
+            
+            prompt = f"""You are a Vault-Tec Corporation technical writer in the Fallout universe. Rewrite the following hackathon solution description to incorporate Fallout-themed language while keeping the technical accuracy intact.
+
+Original description:
+{input_text}
+
+Rewrite guidelines:
+- Maintain all technical details and AWS service references
+- Add retro-futuristic corporate speak (like Vault-Tec marketing)
+- Include subtle references to wasteland survival, vault technology, or atomic age optimism
+- Keep it professional and readable
+- Keep similar length to the original (don't make it much longer)
+
+Respond with ONLY the rewritten description, no explanation."""
+
+        else:
+            return response(400, {'error': 'Invalid type. Use catchphrase or solution'})
+        
+        # Call Bedrock with Claude
+        bedrock_body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 500,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        })
+        
+        bedrock_response = bedrock_runtime.invoke_model(
+            modelId="anthropic.claude-3-haiku-20240307-v1:0",
+            body=bedrock_body,
+            contentType="application/json",
+            accept="application/json"
+        )
+        
+        response_body = json.loads(bedrock_response['body'].read())
+        generated_text = response_body['content'][0]['text'].strip()
+        
+        return response(200, {
+            'generated_text': generated_text,
+            'type': generation_type
+        })
+        
+    except Exception as e:
+        print(f"Bedrock error: {e}")
+        return response(500, {'error': f'AI generation failed: {str(e)}'})
 
 # Public team card handler (no auth required)
 def get_public_team_card(team_id):
@@ -433,6 +519,10 @@ def update_team(team_id, body):
         if 'members' in body:
             update_expr.append('members = :m')
             expr_values[':m'] = body['members']
+        
+        if 'catchphrase' in body:
+            update_expr.append('catchphrase = :cp')
+            expr_values[':cp'] = body['catchphrase']
         
         if not update_expr:
             return response(400, {'error': 'No valid fields to update'})

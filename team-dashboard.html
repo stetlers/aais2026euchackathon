@@ -260,6 +260,49 @@
             background: rgba(0,50,0,0.3);
             border: 1px solid #336633;
         }
+
+        .input-with-btn {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .input-with-btn input,
+        .input-with-btn textarea {
+            flex: 1;
+        }
+
+        .btn-ai {
+            background: transparent;
+            border: 1px solid #ffcc66;
+            color: #ffcc66;
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-ai:hover {
+            background: rgba(255, 204, 102, 0.2);
+        }
+
+        .btn-ai:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .catchphrase-display {
+            background: rgba(0,50,0,0.4);
+            border: 1px solid #44aa44;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #88dd88;
+            text-align: center;
+            font-size: 22px;
+        }
     </style>
 </head>
 <body>
@@ -276,6 +319,17 @@
                     <div class="quick-links">
                         <span class="clickable-link" onclick="showJudgingCriteriaPopup()">📋 View Judging Criteria</span>
                         <span class="clickable-link" onclick="viewVaultIdCard()">🪪 View Vault ID Card</span>
+                    </div>
+
+                    <!-- Team Catchphrase -->
+                    <div id="catchphrase-section" style="display: none;">
+                        <h2>TEAM CATCHPHRASE</h2>
+                        <div class="form-group">
+                            <div class="input-with-btn">
+                                <input type="text" id="catchphrase" placeholder="Your team's Fallout-themed motto...">
+                                <button type="button" class="btn-ai" onclick="generateCatchphrase()" id="gen-catchphrase-btn">⚡ AI GENERATE</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Use Case Selection -->
@@ -297,7 +351,10 @@
                     <h2>SOLUTION DESCRIPTION</h2>
                     <div class="form-group">
                         <label>DESCRIBE YOUR SOLUTION:</label>
-                        <textarea id="solution" placeholder="Describe your solution approach, architecture, and how it addresses the use case challenges..."></textarea>
+                        <div class="input-with-btn">
+                            <textarea id="solution" placeholder="Describe your solution approach, architecture, and how it addresses the use case challenges..."></textarea>
+                            <button type="button" class="btn-ai" onclick="enhanceSolution()" id="enhance-solution-btn">⚡ AI ENHANCE</button>
+                        </div>
                     </div>
 
                     <!-- AWS Services Used -->
@@ -438,6 +495,10 @@
                 
                 document.getElementById('solution').value = teamData.solution_description || '';
                 
+                // Show catchphrase section and populate
+                document.getElementById('catchphrase-section').style.display = 'block';
+                document.getElementById('catchphrase').value = teamData.catchphrase || '';
+                
                 members = teamData.members || [];
                 renderMembers();
                 
@@ -536,6 +597,7 @@
             
             // Filter out empty members
             const validMembers = members.filter(m => m.name && m.name.trim());
+            const catchphrase = document.getElementById('catchphrase').value.trim();
 
             try {
                 const res = await fetch(`${API_URL}/team/me`, {
@@ -548,7 +610,8 @@
                         use_case: useCase,
                         solution_description: solution,
                         members: validMembers,
-                        services_used: services
+                        services_used: services,
+                        catchphrase: catchphrase
                     })
                 });
 
@@ -570,8 +633,78 @@
                 teamData = data;
                 members = data.members || [];
                 services = data.services_used || [];
+                document.getElementById('catchphrase').value = data.catchphrase || '';
             } catch (err) {
                 showStatus('ERROR: Connection failed', 'error');
+            }
+        }
+
+        async function generateCatchphrase() {
+            const teamName = localStorage.getItem('teamName');
+            const catchphraseInput = document.getElementById('catchphrase');
+            const btn = document.getElementById('gen-catchphrase-btn');
+            
+            btn.disabled = true;
+            btn.textContent = 'GENERATING...';
+            
+            try {
+                const res = await fetch(`${API_URL}/ai/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'catchphrase', team_name: teamName })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showStatus('ERROR: ' + (data.error || 'AI generation failed'), 'error');
+                    return;
+                }
+                
+                catchphraseInput.value = data.generated_text;
+                showStatus('Catchphrase generated! Click SAVE to keep it.', 'success');
+            } catch (err) {
+                showStatus('ERROR: AI service unavailable', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚡ AI GENERATE';
+            }
+        }
+
+        async function enhanceSolution() {
+            const solutionInput = document.getElementById('solution');
+            const btn = document.getElementById('enhance-solution-btn');
+            const currentText = solutionInput.value.trim();
+            
+            if (!currentText) {
+                showStatus('ERROR: Enter a solution description first', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'ENHANCING...';
+            
+            try {
+                const res = await fetch(`${API_URL}/ai/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'solution', text: currentText })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showStatus('ERROR: ' + (data.error || 'AI enhancement failed'), 'error');
+                    return;
+                }
+                
+                solutionInput.value = data.generated_text;
+                showStatus('Solution enhanced with Wasteland flair! Click SAVE to keep it.', 'success');
+            } catch (err) {
+                showStatus('ERROR: AI service unavailable', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚡ AI ENHANCE';
             }
         }
 

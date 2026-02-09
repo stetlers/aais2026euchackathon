@@ -228,6 +228,36 @@
             cursor: not-allowed;
         }
 
+        .input-with-btn {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-with-btn input {
+            flex: 1;
+        }
+
+        .btn-small {
+            background: transparent;
+            border: 1px solid #ffcc66;
+            color: #ffcc66;
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-small:hover {
+            background: rgba(255, 204, 102, 0.2);
+        }
+
+        .btn-small:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .error {
             color: #ff6666;
             text-shadow: 0 0 2px #ff3333;
@@ -315,6 +345,13 @@
                         <div class="form-group">
                             <label>TEAM NAME:</label>
                             <input type="text" id="reg-team-name" placeholder="e.g., The Vault Dwellers">
+                        </div>
+                        <div class="form-group">
+                            <label>CATCHPHRASE (optional):</label>
+                            <div class="input-with-btn">
+                                <input type="text" id="reg-catchphrase" placeholder="Your team's motto">
+                                <button type="button" class="btn-small" onclick="generateCatchphrase()" id="gen-catchphrase-btn">⚡ AI GENERATE</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>PASSWORD (min 6 chars):</label>
@@ -423,11 +460,16 @@
                 return;
             }
 
+            const catchphrase = document.getElementById('reg-catchphrase').value.trim();
+
             try {
+                const payload = { team_id: teamId, team_name: teamName, password };
+                if (catchphrase) payload.catchphrase = catchphrase;
+                
                 const res = await fetch(`${API_URL}/auth/team-register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ team_id: teamId, team_name: teamName, password })
+                    body: JSON.stringify(payload)
                 });
                 
                 const data = await res.json();
@@ -483,6 +525,44 @@
                 window.location.href = 'panelist-dashboard.html';
             } catch (err) {
                 errorEl.textContent = 'ERROR: Connection failed';
+            }
+        }
+
+        async function generateCatchphrase() {
+            const teamName = document.getElementById('reg-team-name').value.trim();
+            const catchphraseInput = document.getElementById('reg-catchphrase');
+            const btn = document.getElementById('gen-catchphrase-btn');
+            const errorEl = document.getElementById('reg-error');
+            
+            if (!teamName) {
+                errorEl.textContent = 'ERROR: Enter team name first to generate catchphrase';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'GENERATING...';
+            errorEl.textContent = '';
+            
+            try {
+                const res = await fetch(`${API_URL}/ai/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'catchphrase', team_name: teamName })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    errorEl.textContent = 'ERROR: ' + (data.error || 'AI generation failed');
+                    return;
+                }
+                
+                catchphraseInput.value = data.generated_text;
+            } catch (err) {
+                errorEl.textContent = 'ERROR: AI service unavailable';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⚡ AI GENERATE';
             }
         }
 
