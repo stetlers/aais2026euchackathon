@@ -93,6 +93,7 @@
         .team-header:hover { color: #ccffcc; }
 
         .team-name { font-size: 20px; color: #88ff88; }
+        .team-catchphrase { color: #88dd88; font-size: 16px; font-style: italic; margin: 2px 0; }
         .team-use-case { color: #66aa66; font-size: 16px; }
 
         .team-details { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #336633; }
@@ -864,11 +865,16 @@
                     ? `<span class="use-case-trigger" onclick="event.stopPropagation(); showUseCasePopup(${team.use_case})" title="Click for use case details">${useCaseName}</span>`
                     : 'Not selected';
                 
+                const catchphraseHtml = team.catchphrase 
+                    ? `<div class="team-catchphrase">"${team.catchphrase}"</div>` 
+                    : '';
+                
                 return `
                     <div class="team-card" id="team-${team.team_id}">
                         <div class="team-header" onclick="toggleTeam('${team.team_id}')">
                             <div>
                                 <div class="team-name">${team.team_name || team.team_id}</div>
+                                ${catchphraseHtml}
                                 <div class="team-use-case">Use Case: ${useCaseLink}</div>
                                 ${existingScore ? '<div class="already-scored">✓ Scored: ' + existingScore.total + '/20</div>' : ''}
                             </div>
