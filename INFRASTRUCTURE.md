@@ -41,6 +41,7 @@ aws dynamodb create-table \
 | `members` | List | Array of `{name, role}` objects |
 | `solution_description` | String | Team's solution description |
 | `services_used` | List | AWS services being used |
+| `catchphrase` | String | AI-generated Fallout-themed team motto |
 | `created_at` | String | ISO 8601 timestamp |
 | `updated_at` | String | ISO 8601 timestamp |
 
@@ -234,6 +235,19 @@ aws iam put-role-policy \
 aws iam attach-role-policy \
   --role-name aais-hackathon-lambda-role \
   --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+# Attach Bedrock policy for AI text generation
+aws iam put-role-policy \
+  --role-name aais-hackathon-lambda-role \
+  --policy-name BedrockAccess \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel"],
+      "Resource": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+    }]
+  }'
 ```
 
 ### Create Lambda Function
@@ -298,6 +312,23 @@ The API includes admin-only routes for managing teams and panelists:
 | POST | `/panelists` | Create a new panelist |
 | PUT | `/panelists/{panelist_id}/reset-password` | Reset a panelist's password |
 | PUT | `/panelists/{panelist_id}/toggle-admin` | Toggle admin status |
+| POST | `/ai/generate` | Generate Fallout-themed text (Bedrock AI) |
+| GET | `/team-card/{team_id}` | Get public team card data |
+
+**AI Generate Request Body:**
+```json
+{
+  "type": "catchphrase",
+  "team_name": "Wasteland Warriors"
+}
+```
+or
+```json
+{
+  "type": "solution",
+  "text": "Our solution uses Lambda to process data..."
+}
+```
 
 **Create Panelist Request Body:**
 ```json
@@ -377,7 +408,7 @@ Create via AWS Console or CLI with:
 [ ] Admin panelist seeded
 [ ] Use cases seeded (run seed_use_cases.py)
 [ ] Judging criteria seeded
-[ ] IAM role created with DynamoDB permissions
+[ ] IAM role created with DynamoDB + Bedrock permissions
 [ ] Lambda function deployed
 [ ] API Gateway configured with proxy integration
 [ ] S3 bucket created with static hosting

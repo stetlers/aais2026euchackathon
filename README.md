@@ -23,7 +23,10 @@ Why Fallout? Because Amazon Prime Video's adaptation became a wasteland-sized hi
 ### For Teams (Vault Dwellers)
 - **Use Case Selection** — Choose from 6 pre-war corporate scenarios, each with unique challenges
 - **Team Registration** — Assemble your squad and register your solution
+- **AI Catchphrase Generator** — Let Bedrock create a Fallout-themed team motto
+- **AI Solution Enhancement** — Rewrite your solution with Wasteland flair
 - **Solution Submission** — Document your AWS services and approach
+- **Vault ID Card** — Shareable team identity card with QR code
 - **Dot-Matrix Printouts** — Press 'P' to generate retro-style briefing documents
 
 ### For Panelists (Overseers)
@@ -49,7 +52,12 @@ Why Fallout? Because Amazon Prime Video's adaptation became a wasteland-sized hi
 ┌─────────────────┐     ┌──────────────────┐              │
 │     Teams &     │────▶│   API Gateway    │────▶┌───────┴────────┐
 │    Panelists    │     │    (REST API)    │     │  Lambda (Python)│
-└─────────────────┘     └──────────────────┘     └────────────────┘
+└─────────────────┘     └──────────────────┘     └───────┬────────┘
+                                                          │
+                                                 ┌────────▼────────┐
+                                                 │ Amazon Bedrock  │
+                                                 │ (Claude Haiku)  │
+                                                 └─────────────────┘
 ```
 
 ### Tech Stack
@@ -57,6 +65,7 @@ Why Fallout? Because Amazon Prime Video's adaptation became a wasteland-sized hi
 |-------|------------|-------------------|
 | Frontend | Static HTML/CSS/JS | Pip-Boy Interface |
 | API | AWS Lambda + API Gateway | Mr. Handy's Neural Network |
+| AI | Amazon Bedrock (Claude Haiku) | ROBCO Personality Matrix |
 | Database | DynamoDB | Vault-Tec Records Division |
 | Hosting | S3 + CloudFront | Brotherhood of Steel Broadcast Tower |
 | Auth | Custom JWT | Vault Security Clearance |
@@ -129,6 +138,7 @@ aais2026euchackathon/
 ├── login.html             # Authentication portal
 ├── team-dashboard.html    # Team management interface
 ├── panelist-dashboard.html # Overseer command center
+├── vault-id-card.html     # Shareable team ID card
 ├── lambda-api/
 │   ├── lambda_function.py # All API routes (711 lines of destiny)
 │   ├── seed_use_cases.py  # Initial data population

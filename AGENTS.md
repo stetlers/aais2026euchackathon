@@ -21,6 +21,7 @@ AAIS 2026 EUC Hackathon — A Fallout-themed retro terminal web application for 
 - API Gateway endpoint: `https://fc4xp2lydj.execute-api.us-east-1.amazonaws.com/prod`
 - Custom JWT implementation for authentication (not AWS Cognito)
 - Three user types: `team`, `panelist`, and `admin` (panelist with `is_admin=true`)
+- **Amazon Bedrock** integration for AI-powered text generation (Claude 3 Haiku)
 
 ### Data (DynamoDB Tables)
 - `aais-hackathon-teams` — Team registrations and solution details
@@ -80,10 +81,14 @@ aws dynamodb scan --table-name aais-hackathon-use-cases --region us-east-1 > bac
 | POST | `/panelists` | Admin | Create new panelist |
 | PUT | `/panelists/{id}/reset-password` | Admin | Reset panelist password |
 | PUT | `/panelists/{id}/toggle-admin` | Admin | Toggle admin status |
+| POST | `/ai/generate` | None | Generate Fallout-themed text (Bedrock) |
+| GET | `/team-card/{id}` | None | Public team card for sharing |
 
 ## Key Implementation Details
 
+- **Team fields**: `team_id`, `team_name`, `password`, `use_case`, `members[]`, `solution_description`, `services_used[]`, `catchphrase`
 - **Use case fields**: `name`, `archetype`, `quote`, `background`, `reality`, `persona`, `tension`, `focus`, `challenges[]`, `values[]`, `closing`, `ascii_logo`, `loading_message`, `sort_order`, `active`
+- **AI generation**: `/ai/generate` accepts `{type: "catchphrase"|"solution", team_name?, text?}` and returns `{generated_text, type}`
 - **DynamoDB reserved words**: The Lambda uses `ExpressionAttributeNames` mapping (e.g., `#fvalues` for `values`) to avoid conflicts
 - **Decimal handling**: DynamoDB returns `Decimal` types; `decimal_to_num()` converts for JSON serialization
 - **Scores**: Four categories (presentation, innovation, functionality, aws_well_architected), each 1-5 points
