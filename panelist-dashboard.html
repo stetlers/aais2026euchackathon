@@ -465,6 +465,49 @@
         .judging-popup .popup-content ul { margin: 8px 0 12px 20px; color: #33ff33; }
         .judging-popup .popup-content li { margin-bottom: 5px; }
         .judging-popup .quote { color: #88dd88; font-style: italic; padding: 10px; border-left: 3px solid #44aa44; margin: 10px 0; background: rgba(0,100,0,0.1); }
+
+        /* Voting Status Banner */
+        .voting-status-banner {
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 2px solid;
+            text-align: center;
+            font-size: 18px;
+        }
+        .voting-status-banner.open {
+            border-color: #44aa44;
+            background: rgba(0,100,0,0.2);
+            color: #66ff66;
+        }
+        .voting-status-banner.locked {
+            border-color: #ff6666;
+            background: rgba(100,0,0,0.2);
+            color: #ff6666;
+        }
+        .voting-lock-section {
+            margin-top: 25px;
+            padding: 15px;
+            border: 2px solid #ff6666;
+            background: rgba(100,0,0,0.1);
+        }
+        .voting-lock-section h2 {
+            color: #ff6666;
+            border-bottom-color: #ff6666;
+        }
+        .btn-lock {
+            border-color: #ff6666;
+            color: #ff6666;
+        }
+        .btn-lock:hover {
+            background: rgba(255,0,0,0.2);
+        }
+        .btn-unlock {
+            border-color: #66ff66;
+            color: #66ff66;
+        }
+        .btn-unlock:hover {
+            background: rgba(0,255,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -480,6 +523,11 @@
                     <!-- Quick Links -->
                     <div class="quick-links">
                         <span class="clickable-link" onclick="showJudgingCriteriaPopup()">📋 View Judging Criteria</span>
+                    </div>
+
+                    <!-- Voting Status Banner -->
+                    <div id="voting-status-banner" class="voting-status-banner open">
+                        🗳️ VOTING IS OPEN - Scores can be submitted and modified
                     </div>
 
                     <h2>REGISTERED TEAMS</h2>
@@ -511,8 +559,17 @@
                         <h2 style="margin-top: 25px;">PANELIST MANAGEMENT <span class="admin-badge">ADMIN</span></h2>
                         <p style="color: #aa8800; margin-bottom: 15px;">Reset panelist passwords.</p>
                         <div id="admin-panelists-list"></div>
+
+                        <!-- Voting Lock Section -->
+                        <div class="voting-lock-section">
+                            <h2>🔒 VOTING CONTROL <span class="admin-badge">ADMIN</span></h2>
+                            <p style="color: #ff6666; margin-bottom: 15px;">Lock voting to finalize scores and reveal results to teams.</p>
+                            <div id="voting-lock-status" style="margin-bottom: 15px;"></div>
+                            <button id="voting-lock-btn" class="btn btn-lock" onclick="toggleVotingLock()">🔒 LOCK VOTING</button>
+                            <div id="voting-lock-message" class="admin-status hidden"></div>
+                        </div>
                         
-                        <div id="add-use-case-form" class="hidden" style="margin-top: 15px; padding: 15px; border: 1px solid #aa8800;">
+                        <div id="add-use-case-form" class="hidden"
                             <h3 style="color: #ffcc66; margin-bottom: 15px;">NEW USE CASE</h3>
                             <div class="admin-form-group">
                                 <label>Name:</label>
@@ -615,6 +672,7 @@
         let USE_CASE_NAMES = {}; // Will be populated from API
         let USE_CASE_DETAILS = {}; // Will be populated from API
         let judgingCriteriaData = null; // Will be populated from API
+        let votingLocked = false; // Voting lock status
 
         // Fetch use cases from API
         async function loadUseCases() {
@@ -798,7 +856,8 @@
                 ? welcomeText + ' [ADMIN]' 
                 : welcomeText;
 
-            // Load use cases first, then data
+            // Load voting status and use cases, then data
+            await loadVotingStatus();
             await loadUseCases();
             await loadData();
 
@@ -810,6 +869,86 @@
                 await renderAdminPanelists();
             }
         };
+
+        async function loadVotingStatus() {
+            try {
+                const res = await fetch(`${API_URL}/voting-status`);
+                const data = await res.json();
+                votingLocked = data.voting_locked || false;
+                updateVotingStatusUI();
+            } catch (err) {
+                console.error('Error loading voting status:', err);
+            }
+        }
+
+        function updateVotingStatusUI() {
+            const banner = document.getElementById('voting-status-banner');
+            const lockBtn = document.getElementById('voting-lock-btn');
+            const lockStatus = document.getElementById('voting-lock-status');
+            
+            if (votingLocked) {
+                banner.className = 'voting-status-banner locked';
+                banner.innerHTML = '🔒 VOTING IS LOCKED - Scores are finalized. Results are now visible to teams.';
+                if (lockBtn) {
+                    lockBtn.className = 'btn btn-unlock';
+                    lockBtn.innerHTML = '🔓 UNLOCK VOTING';
+                }
+                if (lockStatus) {
+                    lockStatus.innerHTML = '<span style="color: #ff6666;">Status: LOCKED</span> - Teams can now view their scores and leaderboard position.';
+                }
+            } else {
+                banner.className = 'voting-status-banner open';
+                banner.innerHTML = '🗳️ VOTING IS OPEN - Scores can be submitted and modified';
+                if (lockBtn) {
+                    lockBtn.className = 'btn btn-lock';
+                    lockBtn.innerHTML = '🔒 LOCK VOTING';
+                }
+                if (lockStatus) {
+                    lockStatus.innerHTML = '<span style="color: #66ff66;">Status: OPEN</span> - Panelists can still submit and modify scores.';
+                }
+            }
+        }
+
+        async function toggleVotingLock() {
+            const newLockState = !votingLocked;
+            const action = newLockState ? 'lock' : 'unlock';
+            
+            const confirmMsg = newLockState 
+                ? 'Are you sure you want to LOCK voting?\n\n• Panelists will no longer be able to submit or modify scores\n• Teams will be able to see their final scores and feedback\n\nThis can be reversed if needed.'
+                : 'Are you sure you want to UNLOCK voting?\n\n• Panelists will be able to submit and modify scores again\n• Teams will no longer see their results until voting is locked again';
+            
+            if (!confirm(confirmMsg)) return;
+            
+            const msgEl = document.getElementById('voting-lock-message');
+            const btn = document.getElementById('voting-lock-btn');
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`${API_URL}/voting-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ lock: newLockState })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    showAdminStatus(msgEl, 'ERROR: ' + (data.error || 'Failed to ' + action + ' voting'), 'error');
+                    return;
+                }
+                
+                votingLocked = newLockState;
+                updateVotingStatusUI();
+                showAdminStatus(msgEl, data.message, 'success');
+            } catch (err) {
+                showAdminStatus(msgEl, 'ERROR: Connection failed', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
 
         async function loadData() {
             try {

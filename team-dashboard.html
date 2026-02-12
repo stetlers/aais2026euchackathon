@@ -303,6 +303,92 @@
             text-align: center;
             font-size: 22px;
         }
+
+        /* Results Section */
+        .results-section {
+            background: rgba(0,50,50,0.2);
+            border: 2px solid #44aaaa;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .results-section h2 {
+            color: #66ffff;
+            border-bottom-color: #44aaaa;
+        }
+        .results-banner {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: rgba(0,100,100,0.3);
+            border: 2px solid #44aaaa;
+        }
+        .results-position {
+            font-size: 48px;
+            color: #ffcc66;
+            text-shadow: 0 0 10px #ffcc66;
+        }
+        .results-score {
+            font-size: 32px;
+            color: #66ffff;
+        }
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .score-item {
+            background: rgba(0,50,0,0.3);
+            padding: 10px;
+            border: 1px solid #336633;
+        }
+        .score-item .label { color: #88dd88; font-size: 14px; }
+        .score-item .value { color: #66ffff; font-size: 24px; }
+        .feedback-card {
+            background: rgba(0,30,0,0.4);
+            border: 1px solid #336633;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .feedback-card .panelist-name {
+            color: #ffcc66;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .feedback-card .feedback-scores {
+            color: #66aa66;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .feedback-card .feedback-comments {
+            color: #aaffaa;
+            font-style: italic;
+            padding: 10px;
+            background: rgba(0,50,0,0.3);
+            border-left: 3px solid #44aa44;
+        }
+        .leaderboard-mini {
+            margin-top: 15px;
+        }
+        .leaderboard-mini-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-bottom: 1px solid #223322;
+        }
+        .leaderboard-mini-item.current-team {
+            background: rgba(0,100,100,0.3);
+            border: 1px solid #44aaaa;
+        }
+        .leaderboard-mini-item .rank { color: #ffcc00; width: 40px; }
+        .leaderboard-mini-item .team-name { flex: 1; }
+        .leaderboard-mini-item .score { color: #66ffff; width: 80px; text-align: right; }
+        .voting-pending {
+            text-align: center;
+            padding: 30px;
+            color: #66aa66;
+            border: 1px dashed #336633;
+        }
     </style>
 </head>
 <body>
@@ -319,6 +405,12 @@
                     <div class="quick-links">
                         <span class="clickable-link" onclick="showJudgingCriteriaPopup()">📋 View Judging Criteria</span>
                         <span class="clickable-link" onclick="viewVaultIdCard()">🪪 View Vault ID Card</span>
+                    </div>
+
+                    <!-- Results Section (shown when voting is locked) -->
+                    <div id="results-section" class="results-section" style="display: none;">
+                        <h2>🏆 YOUR RESULTS</h2>
+                        <div id="results-content"></div>
                     </div>
 
                     <!-- Team Catchphrase -->
@@ -412,6 +504,8 @@
         let useCasesData = []; // Will be populated from API
         let USE_CASE_INFO = {}; // Will be populated from API
         let judgingCriteriaData = null; // Will be populated from API
+        let votingLocked = false; // Voting status
+        let resultsData = null; // Team results when voting is locked
 
         // Fetch use cases from API
         async function loadUseCases() {
@@ -471,9 +565,10 @@
             document.getElementById('welcome').textContent = 
                 `Welcome, ${localStorage.getItem('teamName')} (${localStorage.getItem('teamId')})`;
 
-            // Load use cases first, then team data
+            // Load use cases first, then team data and voting status
             await loadUseCases();
             await loadTeamData();
+            await checkVotingStatusAndResults();
         };
 
         async function loadTeamData() {
@@ -511,6 +606,111 @@
                 console.error(err);
                 showStatus('ERROR: Failed to load team data', 'error');
             }
+        }
+
+        async function checkVotingStatusAndResults() {
+            try {
+                // Check voting status
+                const statusRes = await fetch(`${API_URL}/voting-status`);
+                const statusData = await statusRes.json();
+                votingLocked = statusData.voting_locked || false;
+                
+                if (votingLocked) {
+                    // Fetch results
+                    const resultsRes = await fetch(`${API_URL}/team/me/results`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    
+                    if (resultsRes.ok) {
+                        resultsData = await resultsRes.json();
+                        renderResults();
+                    }
+                }
+            } catch (err) {
+                console.error('Error checking voting status:', err);
+            }
+        }
+
+        function renderResults() {
+            if (!resultsData) return;
+            
+            const section = document.getElementById('results-section');
+            const content = document.getElementById('results-content');
+            
+            const teamId = localStorage.getItem('teamId');
+            
+            // Build score breakdown HTML
+            const scores = resultsData.scores || {};
+            let scoresHtml = `
+                <div class="score-breakdown">
+                    <div class="score-item">
+                        <div class="label">PRESENTATION</div>
+                        <div class="value">${scores.presentation || 0}/5</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">INNOVATION</div>
+                        <div class="value">${scores.innovation || 0}/5</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">FUNCTIONALITY</div>
+                        <div class="value">${scores.functionality || 0}/5</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">AWS WELL-ARCHITECTED</div>
+                        <div class="value">${scores.aws_well_architected || 0}/5</div>
+                    </div>
+                </div>
+            `;
+            
+            // Build feedback HTML
+            let feedbackHtml = '';
+            if (resultsData.feedback && resultsData.feedback.length > 0) {
+                feedbackHtml = '<h3 style="margin-top: 20px;">PANELIST FEEDBACK</h3>';
+                resultsData.feedback.forEach(fb => {
+                    feedbackHtml += `
+                        <div class="feedback-card">
+                            <div class="panelist-name">👤 ${fb.panelist_name}</div>
+                            <div class="feedback-scores">
+                                Presentation: ${fb.presentation} | Innovation: ${fb.innovation} | 
+                                Functionality: ${fb.functionality} | AWS: ${fb.aws_well_architected} | 
+                                <strong>Total: ${fb.total}/20</strong>
+                            </div>
+                            ${fb.comments ? `<div class="feedback-comments">"${fb.comments}"</div>` : ''}
+                        </div>
+                    `;
+                });
+            }
+            
+            // Build mini leaderboard HTML
+            let leaderboardHtml = '';
+            if (resultsData.leaderboard && resultsData.leaderboard.length > 0) {
+                leaderboardHtml = '<h3 style="margin-top: 20px;">LEADERBOARD</h3><div class="leaderboard-mini">';
+                resultsData.leaderboard.forEach(item => {
+                    const isCurrentTeam = item.position === resultsData.position;
+                    leaderboardHtml += `
+                        <div class="leaderboard-mini-item ${isCurrentTeam ? 'current-team' : ''}">
+                            <span class="rank">#${item.position}</span>
+                            <span class="team-name">${item.team_name}${isCurrentTeam ? ' ← YOU' : ''}</span>
+                            <span class="score">${item.avg_total}/20</span>
+                        </div>
+                    `;
+                });
+                leaderboardHtml += '</div>';
+            }
+            
+            content.innerHTML = `
+                <div class="results-banner">
+                    <div class="results-position">#${resultsData.position || '?'}</div>
+                    <div>out of ${resultsData.total_teams || '?'} teams</div>
+                    <div class="results-score">${scores.total || 0}/20 avg</div>
+                    <div style="color: #66aa66; font-size: 14px;">(${resultsData.num_reviews || 0} panelist reviews)</div>
+                </div>
+                ${scoresHtml}
+                ${feedbackHtml}
+                ${leaderboardHtml}
+            `;
+            
+            section.style.display = 'block';
         }
 
         function updateUseCaseInfo() {

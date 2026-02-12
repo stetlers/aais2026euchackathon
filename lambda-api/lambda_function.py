@@ -137,6 +137,10 @@ def lambda_handler(event, context):
         if path == '/judging-criteria' and http_method == 'GET':
             return get_judging_criteria()
         
+        # Public voting status route (no auth required)
+        if path == '/voting-status' and http_method == 'GET':
+            return get_voting_status()
+        
         # Public team card route (no auth required, limited data for sharing)
         if path.startswith('/team-card/') and http_method == 'GET':
             team_id = path.split('/')[-1]
@@ -161,6 +165,11 @@ def lambda_handler(event, context):
             if auth.get('type') != 'team':
                 return response(403, {'error': 'Forbidden - Team access only'})
             return update_team(auth['team_id'], body)
+        
+        if path == '/team/me/results' and http_method == 'GET':
+            if auth.get('type') != 'team':
+                return response(403, {'error': 'Forbidden - Team access only'})
+            return get_team_results(auth['team_id'])
         
         # Panelist routes
         if path == '/teams' and http_method == 'GET':
@@ -209,6 +218,12 @@ def lambda_handler(event, context):
             if auth.get('type') != 'panelist' or not auth.get('is_admin'):
                 return response(403, {'error': 'Forbidden - Admin access only'})
             return update_judging_criteria(body)
+        
+        # Admin-only voting lock management
+        if path == '/voting-status' and http_method == 'PUT':
+            if auth.get('type') != 'panelist' or not auth.get('is_admin'):
+                return response(403, {'error': 'Forbidden - Admin access only'})
+            return toggle_voting_status(body)
         
         # Admin-only team management
         if path.startswith('/teams/') and path.endswith('/reset-password') and http_method == 'PUT':
@@ -565,6 +580,15 @@ def get_all_teams():
 # Score handlers
 def submit_score(panelist_id, body):
     """Submit or update a score"""
+    # Check if voting is locked
+    try:
+        criteria_result = judging_criteria_table.get_item(Key={'criteria_id': 'main'})
+        criteria = criteria_result.get('Item', {})
+        if criteria.get('voting_locked', False):
+            return response(403, {'error': 'Voting is locked - scores can no longer be submitted or modified'})
+    except Exception as e:
+        print(f"Error checking voting status: {e}")
+    
     team_id = body.get('team_id', '')
     
     if not team_id:
@@ -864,6 +888,163 @@ def update_judging_criteria(body):
         )
         
         return response(200, result.get('Attributes', {}))
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+# Voting status handlers
+def get_voting_status():
+    """Get voting lock status (public)"""
+    try:
+        result = judging_criteria_table.get_item(Key={'criteria_id': 'main'})
+        criteria = result.get('Item', {})
+        
+        return response(200, {
+            'voting_locked': criteria.get('voting_locked', False),
+            'locked_at': criteria.get('voting_locked_at'),
+            'locked_by': criteria.get('voting_locked_by')
+        })
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+def toggle_voting_status(body):
+    """Toggle voting lock status (admin only)"""
+    lock = body.get('lock', None)
+    
+    if lock is None:
+        return response(400, {'error': 'lock field required (true or false)'})
+    
+    try:
+        if lock:
+            # Lock voting
+            result = judging_criteria_table.update_item(
+                Key={'criteria_id': 'main'},
+                UpdateExpression='SET voting_locked = :vl, voting_locked_at = :va, updated_at = :ua',
+                ExpressionAttributeValues={
+                    ':vl': True,
+                    ':va': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                    ':ua': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                },
+                ReturnValues='ALL_NEW'
+            )
+            return response(200, {
+                'message': 'Voting has been locked. No more scores can be submitted.',
+                'voting_locked': True,
+                'locked_at': result.get('Attributes', {}).get('voting_locked_at')
+            })
+        else:
+            # Unlock voting
+            result = judging_criteria_table.update_item(
+                Key={'criteria_id': 'main'},
+                UpdateExpression='SET voting_locked = :vl, updated_at = :ua REMOVE voting_locked_at, voting_locked_by',
+                ExpressionAttributeValues={
+                    ':vl': False,
+                    ':ua': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+                },
+                ReturnValues='ALL_NEW'
+            )
+            return response(200, {
+                'message': 'Voting has been unlocked. Panelists can now submit scores.',
+                'voting_locked': False
+            })
+    except Exception as e:
+        return response(500, {'error': str(e)})
+
+def get_team_results(team_id):
+    """Get team's scores and leaderboard position (team only, requires voting locked)"""
+    try:
+        # Check if voting is locked
+        criteria_result = judging_criteria_table.get_item(Key={'criteria_id': 'main'})
+        criteria = criteria_result.get('Item', {})
+        
+        if not criteria.get('voting_locked', False):
+            return response(403, {'error': 'Results are not available yet. Voting must be locked first.'})
+        
+        # Get this team's scores
+        scores_result = scores_table.query(
+            KeyConditionExpression='team_id = :tid',
+            ExpressionAttributeValues={':tid': team_id}
+        )
+        team_scores = scores_result.get('Items', [])
+        
+        # Calculate team's average
+        if team_scores:
+            num_scores = len(team_scores)
+            avg_presentation = sum(s['presentation'] for s in team_scores) / num_scores
+            avg_innovation = sum(s['innovation'] for s in team_scores) / num_scores
+            avg_functionality = sum(s['functionality'] for s in team_scores) / num_scores
+            avg_aws = sum(s['aws_well_architected'] for s in team_scores) / num_scores
+            avg_total = sum(s['total'] for s in team_scores) / num_scores
+        else:
+            avg_presentation = avg_innovation = avg_functionality = avg_aws = avg_total = 0
+            num_scores = 0
+        
+        # Get panelist names for feedback
+        feedback = []
+        for score in team_scores:
+            panelist_result = panelists_table.get_item(Key={'panelist_id': score['panelist_id']})
+            panelist = panelist_result.get('Item', {})
+            feedback.append({
+                'panelist_name': panelist.get('name', score['panelist_id']),
+                'presentation': score.get('presentation'),
+                'innovation': score.get('innovation'),
+                'functionality': score.get('functionality'),
+                'aws_well_architected': score.get('aws_well_architected'),
+                'total': score.get('total'),
+                'comments': score.get('comments', '')
+            })
+        
+        # Get all teams' scores for leaderboard position
+        all_scores_result = scores_table.scan()
+        all_scores = all_scores_result.get('Items', [])
+        
+        team_totals = {}
+        for score in all_scores:
+            tid = score['team_id']
+            if tid not in team_totals:
+                team_totals[tid] = {'total': 0, 'count': 0}
+            team_totals[tid]['total'] += score['total']
+            team_totals[tid]['count'] += 1
+        
+        # Calculate averages and sort
+        leaderboard = []
+        for tid, data in team_totals.items():
+            avg = data['total'] / data['count'] if data['count'] > 0 else 0
+            leaderboard.append({'team_id': tid, 'avg_total': avg})
+        
+        leaderboard.sort(key=lambda x: x['avg_total'], reverse=True)
+        
+        # Find this team's position
+        position = next((i + 1 for i, item in enumerate(leaderboard) if item['team_id'] == team_id), None)
+        total_teams = len(leaderboard)
+        
+        # Get team names for leaderboard
+        teams_result = teams_table.scan()
+        all_teams = {t['team_id']: t.get('team_name', t['team_id']) for t in teams_result.get('Items', [])}
+        
+        leaderboard_with_names = [
+            {
+                'position': i + 1,
+                'team_name': all_teams.get(item['team_id'], item['team_id']),
+                'avg_total': round(item['avg_total'], 2)
+            }
+            for i, item in enumerate(leaderboard)
+        ]
+        
+        return response(200, {
+            'team_id': team_id,
+            'position': position,
+            'total_teams': total_teams,
+            'scores': {
+                'presentation': round(avg_presentation, 2),
+                'innovation': round(avg_innovation, 2),
+                'functionality': round(avg_functionality, 2),
+                'aws_well_architected': round(avg_aws, 2),
+                'total': round(avg_total, 2)
+            },
+            'num_reviews': num_scores,
+            'feedback': feedback,
+            'leaderboard': leaderboard_with_names
+        })
     except Exception as e:
         return response(500, {'error': str(e)})
 
